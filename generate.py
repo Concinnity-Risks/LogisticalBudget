@@ -1,21 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Éireann Leverett and Bruce Stenning
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 # Standard Python imports
 #
 import sys
@@ -111,7 +96,7 @@ if __name__ == "__main__":
                     {"num_days": 15 * 30 if monthly else 3 * 30,
                      "bin_size": 30 if monthly else 7,
                      "scoring_function": scoring.score_by_event_threat_level,
-                     "scoring_name": "Sum of event threat levels (high = 100, medium = 10, low = 1)",
+                     "scoring_name": "Sum of event threat levels (high = 100, medium = 50, low = 1)",
                      "filename": "heatmap-levels-" + ("monthly" if monthly else "weekly"),
                      "use_plotly": html
                      })
@@ -134,30 +119,22 @@ if __name__ == "__main__":
                 sets.append(
                     {"num_days": 15 * 30 if monthly else 3 * 30,
                      "bin_size": 30 if monthly else 7,
-                     "scoring_function": scoring.score_by_ip_count,
-                     "scoring_name": "Number of IP addresses implicated",
-                     "filename": "heatmap-ipcount-" + ("monthly" if monthly else "weekly"),
+                     "scoring_function": scoring.score_by_domain_count,
+                     "scoring_name": "Number of domains implicated",
+                     "filename": "heatmap-domains-" + ("monthly" if monthly else "weekly"),
                      "use_plotly": html
                      })
                 sets.append(
                     {"num_days": 15 * 30 if monthly else 3 * 30,
                      "bin_size": 30 if monthly else 7,
-                     "scoring_function": scoring.score_by_domain_and_url,
-                     "scoring_name": "Number of domains and URLs implicated",
-                     "filename": "heatmap-domainsandurls-" + ("monthly" if monthly else "weekly"),
-                     "use_plotly": html
-                     })
-                sets.append(
-                    {"num_days": 15 * 30 if monthly else 3 * 30,
-                     "bin_size": 30 if monthly else 7,
-                     "scoring_function": scoring.score_by_malware_binaries,
-                     "scoring_name": "Numbers of malware binaries recorded",
-                     "filename": "heatmap-binaries-" + ("monthly" if monthly else "weekly"),
+                     "scoring_function": scoring.score_by_malware_files,
+                     "scoring_name": "Numbers of malware files recorded",
+                     "filename": "heatmap-files-" + ("monthly" if monthly else "weekly"),
                      "use_plotly": html
                      })
                 # This scores nothing against threat actors
                 # sets.append(
-                #     {"num_days": 15 * 30 if monthly else 3 * 30,
+                #     {"num_days": 3 * 30 if monthly else 3 * 30,
                 #      "bin_size": 30 if monthly else 7,
                 #      "scoring_function": scoring.score_by_amount_of_external_analysis,
                 #      "scoring_name": "Numbers of amount of external analysis recorded",
