@@ -59,14 +59,12 @@ def score_by_domain_count(event, attributes):
 
     return score
 
-
-
 def score_by_malware_files(event, attributes):
     """ Score based on indicators of malware recorded """
     score = 0
 
     for attribute in attributes:
-        if attribute["category"] == "Payload delivery":
+        if (attribute["category"] == "Payload installation") or (attribute["category"] == "Payload delivery"):
             ty = attribute["type"]
             if ty == "filename" or ty == "md5" or ty == "sha256" or ty == "sha1":
                 score += 10
