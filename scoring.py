@@ -86,3 +86,48 @@ def score_by_amount_of_external_analysis(event, attributes):
                 score += 1
 
     return score
+
+
+def score_skill(event, attributes):
+    """ Score based on indicators of skill """
+    score = 0
+
+    # TBD
+
+    return score
+
+
+def score_team_size(event, attributes):
+    """ Score based on indicators of team size """
+    score = 0
+
+    # TBD
+
+    return score
+
+
+def score_resource_cost(event, attributes):
+    """ Score based on indicators of resource cost """
+    score = 0
+
+    # TBD
+
+    return score
+
+
+def score_time_cost(event, attributes):
+    """ Score based on indicators of time cost """
+    score = 0
+
+    # TBD
+
+    return score
+
+
+def score_logistical_burden(event, attributes):
+    """ Score based on indicators of logistical burden """
+    score = 0
+
+    # TBD
+
+    return score

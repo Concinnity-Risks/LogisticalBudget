@@ -16,6 +16,83 @@ from tqdm import tqdm
 import plotly
 import plotly.graph_objs as graph_objs
 
+# Modules directly associated with this application
+#
+import scoring
+import utility
+
+
+def generate_heatmaps(misp_data):
+    """
+    Generate heatmaps for various criteria
+
+    misp_data - The events and attributes loaded from the MISP server
+    """
+
+    sets = []
+    for html in [True, False]:
+        for monthly in [False, True]:
+            sets.append(
+                {"num_days": 15 * 30 if monthly else 3 * 30,
+                 "bin_size": 30 if monthly else 7,
+                 "scoring_function": scoring.score_by_event_count,
+                 "scoring_name": "Threat actor events",
+                 "filename": "heatmap-count-" + ("monthly" if monthly else "weekly"),
+                 "use_plotly": html
+                 })
+            sets.append(
+                {"num_days": 15 * 30 if monthly else 3 * 30,
+                 "bin_size": 30 if monthly else 7,
+                 "scoring_function": scoring.score_by_event_threat_level,
+                 "scoring_name": "Sum of event threat levels (high = 100, medium = 50, low = 1)",
+                 "filename": "heatmap-levels-" + ("monthly" if monthly else "weekly"),
+                 "use_plotly": html
+                 })
+            sets.append(
+                {"num_days": 15 * 30 if monthly else 3 * 30,
+                 "bin_size": 30 if monthly else 7,
+                 "scoring_function": scoring.score_by_source_ips,
+                 "scoring_name": "Number of source IP addresses implicated",
+                 "filename": "heatmap-ipsrc-" + ("monthly" if monthly else "weekly"),
+                 "use_plotly": html
+                 })
+            sets.append(
+                {"num_days": 15 * 30 if monthly else 3 * 30,
+                 "bin_size": 30 if monthly else 7,
+                 "scoring_function": scoring.score_by_destination_ips,
+                 "scoring_name": "Number of destination IP addresses implicated",
+                 "filename": "heatmap-ipdst-" + ("monthly" if monthly else "weekly"),
+                 "use_plotly": html
+                 })
+            sets.append(
+                {"num_days": 15 * 30 if monthly else 3 * 30,
+                 "bin_size": 30 if monthly else 7,
+                 "scoring_function": scoring.score_by_domain_count,
+                 "scoring_name": "Number of domains implicated",
+                 "filename": "heatmap-domains-" + ("monthly" if monthly else "weekly"),
+                 "use_plotly": html
+                 })
+            sets.append(
+                {"num_days": 15 * 30 if monthly else 3 * 30,
+                 "bin_size": 30 if monthly else 7,
+                 "scoring_function": scoring.score_by_malware_files,
+                 "scoring_name": "Numbers of malware files recorded",
+                 "filename": "heatmap-files-" + ("monthly" if monthly else "weekly"),
+                 "use_plotly": html
+                 })
+            # This scores nothing against threat actors
+            # sets.append(
+            #     {"num_days": 3 * 30 if monthly else 3 * 30,
+            #      "bin_size": 30 if monthly else 7,
+            #      "scoring_function": scoring.score_by_amount_of_external_analysis,
+            #      "scoring_name": "Numbers of amount of external analysis recorded",
+            #      "filename": "heatmap-analysis-" + ("monthly" if monthly else "weekly"),
+            #      "use_plotly": html
+            #      })
+
+    for set in sets:
+        generate_by_threat_actor(misp_data, **set)
+
 
 def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, scoring_name, filename, use_plotly):
     """
@@ -31,6 +108,7 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
     """
 
     events = misp_data["events"]
+    attributes = misp_data["attributes"]
 
     title = scoring_name + " per " + str(bin_size) + " day period"
     print("Generating " + ("HTML" if use_plotly else "PNG") + " for " + title)
@@ -39,15 +117,7 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
     unattributed = "Unattributed"
 
     # Generate dictionary of threat actors
-    #
-    threat_actors = {unattributed: True}
-    for event in events:
-        if "GalaxyCluster" in event:
-            galaxycluster = event["GalaxyCluster"]
-            for galaxy in galaxycluster:
-                if "Galaxy" in galaxy:
-                    if galaxy["type"] == "threat-actor":
-                        threat_actors[galaxy["value"]] = True
+    threat_actors = utility.identify_threat_actors(misp_data, initial={unattributed: True})
 
     # Construct an initial table of actors and number of events by day
     #
@@ -59,7 +129,6 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
 
     # Scan the events by actor and timestamp
     #
-    attributes = misp_data["attributes"]
     for event in tqdm(events):
         event_id = int(event["id"])
         if event_id in attributes:

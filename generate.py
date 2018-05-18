@@ -8,6 +8,7 @@ import platform
 import os
 import json
 import pprint
+import argparse
 
 # Use local Python modules if requested
 #
@@ -28,21 +29,9 @@ from settings import url, key, ssl
 import caching
 import misp
 import analysis
-import scoring
 import heatmaps
-
-
-def usage():
-    """ Print the usage information """
-
-    print("Accepted arguments:")
-    print("  --dumpcache  Load the contents of the cache.obj file and pretty-print")
-    print("               it to a text file named cache.txt")
-    print("")
-    print("  --nocache    Avoid reading or writing information from or to the cache")
-    print("               and query the MISP server directly (slow)")
-    print("")
-    print("  --analyse    Produce an analysis of structure of the MISP data")
+import actor
+import utility
 
 
 #
@@ -57,104 +46,55 @@ if __name__ == "__main__":
 
     # Process command-line arguments
     #
-    dump_cache = False
-    use_cache = True
-    analyse = False
-    for arg in sys.argv[1:]:
-        if arg == "--dumpcache":
-            dump_cache = True
-        elif arg == "--nocache":
-            use_cache = False
-        elif arg == "--analyse":
-            analyse = True
-        else:
-            print("Unknown command-line argument: " + arg)
-            usage()
-            sys.exit(1)
+    parser = argparse.ArgumentParser(description="With no arguments, the cached data will be used to generate " +
+        "heatmaps showing threat actors against time, scored by various criteria.")
+
+    parser.add_argument("--nocache", dest="use_cache", action="store_const", const=False, default=True,
+         help="Avoid reading or writing information from or to the cache and query the MISP server directly (which can be slow)")
+
+    parser.add_argument("--dumpcache", dest="dump_cache", action="store_const", const=True, default=False,
+         help="Load the contents of the cache.obj file and pretty-print it to a text file named cache.txt")
+
+    parser.add_argument("--actor", metavar="NAME", dest="actor", type=str, default="Unknown",
+         help="Show scoring for the named threat actor")
+
+    parser.add_argument("--listactors", dest="list_actors", action="store_const", const=True, default=False,
+         help="Produce list of the known threat actors in the data")
+
+    parser.add_argument("--analyse", dest="analyse", action="store_const", const=True, default=False,
+         help="Produce an analysis of structure of the MISP data")
+
+    args = parser.parse_args()
 
     # If requested, pretty print the cache contents into a file
     #
-    if dump_cache:
+    if args.dump_cache:
         caching.dump_cache()
         sys.exit(0)
 
     # Obtain the event data, either from the local cache or from the MISP server
     #
-    misp_data = misp.get_misp_data(misp_server, use_cache)
+    misp_data = misp.get_misp_data(misp_server, args.use_cache)
     total = len(misp_data["events"])
     if total == 0:
         sys.exit("No events returned")
 
-    if analyse:
+    if args.actor != "Unknown":
+        # Produce a score table for the specified threat actor against various criteria
+        actor.threat_actor_scorecard(misp_data, args.actor)
+
+    elif args.analyse:
         # Perform some basic analysis on the MISP data, which can be useful
         # for learning what is present in the data
-        #
         analysis.analyse(misp_data)
+
+    elif args.list_actors:
+        # List the threat actors present in the data
+        #
+        threat_actors = utility.identify_threat_actors(misp_data, initial={})
+        for actor in threat_actors:
+            print(actor)
+
     else:
         # Generate the desired heat maps
-        #
-
-        sets = []
-        for html in [True, False]:
-            for monthly in [False, True]:
-                sets.append(
-                    {"num_days": 15 * 30 if monthly else 3 * 30,
-                     "bin_size": 30 if monthly else 7,
-                     "scoring_function": scoring.score_by_event_count,
-                     "scoring_name": "Threat actor events",
-                     "filename": "heatmap-count-" + ("monthly" if monthly else "weekly"),
-                     "use_plotly": html
-                     })
-                sets.append(
-                    {"num_days": 15 * 30 if monthly else 3 * 30,
-                     "bin_size": 30 if monthly else 7,
-                     "scoring_function": scoring.score_by_event_threat_level,
-                     "scoring_name": "Sum of event threat levels (high = 100, medium = 50, low = 1)",
-                     "filename": "heatmap-levels-" + ("monthly" if monthly else "weekly"),
-                     "use_plotly": html
-                     })
-                sets.append(
-                    {"num_days": 15 * 30 if monthly else 3 * 30,
-                     "bin_size": 30 if monthly else 7,
-                     "scoring_function": scoring.score_by_source_ips,
-                     "scoring_name": "Number of source IP addresses implicated",
-                     "filename": "heatmap-ipsrc-" + ("monthly" if monthly else "weekly"),
-                     "use_plotly": html
-                     })
-                sets.append(
-                    {"num_days": 15 * 30 if monthly else 3 * 30,
-                     "bin_size": 30 if monthly else 7,
-                     "scoring_function": scoring.score_by_destination_ips,
-                     "scoring_name": "Number of destination IP addresses implicated",
-                     "filename": "heatmap-ipdst-" + ("monthly" if monthly else "weekly"),
-                     "use_plotly": html
-                     })
-                sets.append(
-                    {"num_days": 15 * 30 if monthly else 3 * 30,
-                     "bin_size": 30 if monthly else 7,
-                     "scoring_function": scoring.score_by_domain_count,
-                     "scoring_name": "Number of domains implicated",
-                     "filename": "heatmap-domains-" + ("monthly" if monthly else "weekly"),
-                     "use_plotly": html
-                     })
-                sets.append(
-                    {"num_days": 15 * 30 if monthly else 3 * 30,
-                     "bin_size": 30 if monthly else 7,
-                     "scoring_function": scoring.score_by_malware_files,
-                     "scoring_name": "Numbers of malware files recorded",
-                     "filename": "heatmap-files-" + ("monthly" if monthly else "weekly"),
-                     "use_plotly": html
-                     })
-                # This scores nothing against threat actors
-                # sets.append(
-                #     {"num_days": 3 * 30 if monthly else 3 * 30,
-                #      "bin_size": 30 if monthly else 7,
-                #      "scoring_function": scoring.score_by_amount_of_external_analysis,
-                #      "scoring_name": "Numbers of amount of external analysis recorded",
-                #      "filename": "heatmap-analysis-" + ("monthly" if monthly else "weekly"),
-                #      "use_plotly": html
-                #      })
-
-        for set in sets:
-            heatmaps.generate_by_threat_actor(
-                misp_data, **set)
+        heatmaps.generate_heatmaps(misp_data)
