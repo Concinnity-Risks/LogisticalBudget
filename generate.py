@@ -32,6 +32,19 @@ import scoring
 import heatmaps
 
 
+def usage():
+    """ Print the usage information """
+
+    print("Accepted arguments:")
+    print("  --dumpcache  Load the contents of the cache.obj file and pretty-print")
+    print("               it to a text file named cache.txt")
+    print("")
+    print("  --nocache    Avoid reading or writing information from or to the cache")
+    print("               and query the MISP server directly (slow)")
+    print("")
+    print("  --analyse    Produce an analysis of structure of the MISP data")
+
+
 #
 # Main program
 #
@@ -56,7 +69,7 @@ if __name__ == "__main__":
             analyse = True
         else:
             print("Unknown command-line argument: " + arg)
-            print("Known arguments: --dumpcache --nocache --analyse")
+            usage()
             sys.exit(1)
 
     # If requested, pretty print the cache contents into a file
