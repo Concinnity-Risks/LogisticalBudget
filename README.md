@@ -8,6 +8,7 @@ domains'.
 
 # Dependencies
 
+    pip3 install --user setuptools wheel
     pip3 install --user tqdm plotly pymisp
 
 # Building and running
