@@ -4,3 +4,5 @@ settings.py
 heatmap*.html
 heatmap*.plt
 heatmap*.png
+.hg
+.hgignore
