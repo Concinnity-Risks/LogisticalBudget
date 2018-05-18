@@ -1,5 +1,6 @@
 __pycache__
 cache.obj
+cache.txt
 settings.py
 heatmap*.html
 heatmap*.plt
