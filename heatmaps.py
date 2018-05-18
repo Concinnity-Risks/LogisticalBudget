@@ -245,9 +245,12 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
                 outfile.write("EOD\n")
                 outfile.write("splot \"$map1\" matrix with image\n")
 
-            process = subprocess.Popen(
-                args=["gnuplot", filename + ".plt"],
-                stdout=subprocess.PIPE)
-            output = process.communicate()[0].decode("utf-8")
-            if len(output) != 0:
-                print(output)
+            try:
+                process = subprocess.Popen(
+                    args=["gnuplot", filename + ".plt"],
+                    stdout=subprocess.PIPE)
+                output = process.communicate()[0].decode("utf-8")
+                if len(output) != 0:
+                    print(output)
+            except Exception:
+                print("Unable to run gnuplot: Is it installed?")
