@@ -55,8 +55,8 @@ if __name__ == "__main__":
     parser.add_argument("--dumpcache", dest="dump_cache", action="store_const", const=True, default=False,
          help="Load the contents of the cache.obj file and pretty-print it to a text file named cache.txt")
 
-    parser.add_argument("--actor", metavar="NAME", dest="actor", type=str, default="Unknown",
-         help="Show scoring for the named threat actor")
+    parser.add_argument("--actorscores", dest="actor_scores", action="store_const", const=True, default=False,
+         help="Show scoring for all threat actors")
 
     parser.add_argument("--listactors", dest="list_actors", action="store_const", const=True, default=False,
          help="Produce list of the known threat actors in the data")
@@ -79,9 +79,9 @@ if __name__ == "__main__":
     if total == 0:
         sys.exit("No events returned")
 
-    if args.actor != "Unknown":
-        # Produce a score table for the specified threat actor against various criteria
-        actor.threat_actor_scorecard(misp_data, args.actor)
+    if args.actor_scores:
+        # Produce a score table against various criteria for each threat actor
+        actor.generate_threat_actor_scorecards(misp_data)
 
     elif args.analyse:
         # Perform some basic analysis on the MISP data, which can be useful
