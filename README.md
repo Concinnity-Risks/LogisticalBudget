@@ -8,8 +8,14 @@ domains'.
 
 # Dependencies
 
+Install Python packages:
+
     pip3 install --user setuptools wheel
     pip3 install --user tqdm plotly pymisp
+
+Install additional packages, for example on Fedora:
+
+    sudo dnf install gnuplot ImageMagick
 
 # Building and running
 

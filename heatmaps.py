@@ -321,5 +321,5 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
                 output = process.communicate()[0].decode("utf-8")
                 if len(output) != 0:
                     print(output)
-            except Exception:
-                print("Unable to run gnuplot: Is it installed?")
+            except Exception as e:
+                print("Unable to run gnuplot: Is it installed?  " + repr(e))
