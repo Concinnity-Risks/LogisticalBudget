@@ -92,7 +92,12 @@ def score_skill(event, attributes):
     """ Score based on indicators of skill """
     score = 0
 
-    # TBD
+    if event["threat_level_id"] == "1":  # High
+        score += 100
+    elif event["threat_level_id"] == "2":  # Medium
+        score += 50
+    elif event["threat_level_id"] == "3":  # Low
+        score += 1
 
     return score
 
@@ -101,7 +106,23 @@ def score_team_size(event, attributes):
     """ Score based on indicators of team size """
     score = 0
 
-    # TBD
+    for attribute in attributes:
+        if attribute["category"] == "Artifacts dropped":
+            ty = attribute["type"]
+            if ty == "vulnerability":
+                score += 50
+            elif ty == "malware-sample":
+                score += 10
+            elif ty == "filename" or ty == "filename|md5" or ty == "filename|sha1" or ty == "filename|sha256" or ty == "attachment":
+                score += 5
+        elif attribute["category"] == "Network activity":
+            ty = attribute["type"]
+            if ty == "domain":
+                score += 20
+        elif attribute["category"] == "Targeting data":
+            ty = attribute["type"]
+            if ty == "target-location":
+                score += 50
 
     return score
 
@@ -110,7 +131,15 @@ def score_resource_cost(event, attributes):
     """ Score based on indicators of resource cost """
     score = 0
 
-    # TBD
+    for attribute in attributes:
+        if attribute["category"] == "External analysis":
+            ty = attribute["type"]
+            if ty == "vulnerability":
+                score += 50
+            elif ty == "link count" or ty == "url count":
+                score += 10
+            elif ty == "comment count":
+                score += 1
 
     return score
 
@@ -119,15 +148,23 @@ def score_time_cost(event, attributes):
     """ Score based on indicators of time cost """
     score = 0
 
-    # TBD
+    for attribute in attributes:
+        if attribute["category"] == "External analysis":
+            ty = attribute["type"]
+            if ty == "vulnerability":
+                score += 100
+            elif ty == "link count" or ty == "url count":
+                score += 10
 
     return score
 
 
 def score_logistical_burden(event, attributes):
     """ Score based on indicators of logistical burden """
-    score = 0
 
-    # TBD
+    skill = score_skill(event, attributes)
+    team_size = score_team_size(event, attributes)
+    resource_cost = score_resource_cost(event, attributes)
+    time_cost = score_time_cost(event, attributes)
 
-    return score
+    return skill * team_size * (resource_cost + time_cost)

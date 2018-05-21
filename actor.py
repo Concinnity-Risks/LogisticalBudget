@@ -15,6 +15,11 @@ import scoring
 import utility
 
 
+# TODO: Title for the scorecard
+# TODO: More representative scoring functions
+# TODO: Error bars (or similar)
+
+
 def generate_threat_actor_scorecards(misp_data):
     """
     Generate a score card for the specified threat actor
@@ -54,6 +59,17 @@ def generate_threat_actor_scorecards(misp_data):
         "logistical_burden": 1000
     };
 
+    # Unlike the heatmap scores, which are used for comparative analysis of the threat actors, this
+    # is a bit more complex in that the scores are intended to be absolutes in specific units.
+    #
+    score_multiplier = {
+        "skill": 0.002,
+        "team_size": 0.00001,
+        "resource_cost": 2000,
+        "time_cost": 0.002,
+        "logistical_burden": 0.00002
+    };
+
     # Generate an initial collection of score cards
     #
     scorecards = {}
@@ -75,7 +91,8 @@ def generate_threat_actor_scorecards(misp_data):
         else:
             event_attributes = []
 
-        event_actor = "Unattributed"
+        unattributed = "Unattributed"
+        event_actor = unattributed
 
         if "GalaxyCluster" in event:
             galaxycluster = event["GalaxyCluster"]
@@ -84,11 +101,12 @@ def generate_threat_actor_scorecards(misp_data):
                     if galaxy["type"] == "threat-actor":
                         event_actor = galaxy["value"]
 
-        scorecards[actor]["skill"] += scoring.score_skill(event, attributes)
-        scorecards[actor]["team_size"] += scoring.score_team_size(event, attributes)
-        scorecards[actor]["resource_cost"] += scoring.score_resource_cost(event, attributes)
-        scorecards[actor]["time_cost"] += scoring.score_time_cost(event, attributes)
-        scorecards[actor]["logistical_burden"] += scoring.score_logistical_burden(event, attributes)
+        if event_actor != unattributed:
+            scorecards[event_actor]["skill"] += scoring.score_skill(event, event_attributes)
+            scorecards[event_actor]["team_size"] += scoring.score_team_size(event, event_attributes)
+            scorecards[event_actor]["resource_cost"] += scoring.score_resource_cost(event, event_attributes)
+            scorecards[event_actor]["time_cost"] += scoring.score_time_cost(event, event_attributes)
+            scorecards[event_actor]["logistical_burden"] += scoring.score_logistical_burden(event, event_attributes)
 
     # Now generate our score card as a sumple text output for now
     #
@@ -156,10 +174,10 @@ def generate_threat_actor_scorecards(misp_data):
                     else:
                         outfile.write("set format y \"%6.0f\"\n")
 
-                    # Output the score
+                    # Output the scaled score
                     #
                     outfile.write("$" + score + " << EOD\n\"\" 0\n")
-                    val = 2.5 #scorecards[actor][score]
+                    val = scorecards[actor][score] * score_multiplier[score]
                     outfile.write("\"" + str(score_descriptions[score]) + "\" " + str(val) + "\n")
 
                     # End the data, and plot
