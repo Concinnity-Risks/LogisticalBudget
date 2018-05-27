@@ -36,7 +36,6 @@ def generate_threat_actor_scorecards(misp_data):
     # Set up the score characteristics
     #
     score_descriptions = {
-        "skill": "Skill",
         "team_size": "Team Size",
         "resource_cost": "Resource Cost",
         "time_cost": "Time Cost",
@@ -44,7 +43,6 @@ def generate_threat_actor_scorecards(misp_data):
     };
 
     score_units = {
-        "skill": "Stars",
         "team_size": "People",
         "resource_cost": "$",
         "time_cost": "Years",
@@ -52,7 +50,6 @@ def generate_threat_actor_scorecards(misp_data):
     };
 
     score_range = {
-        "skill": 7,
         "team_size": 30,
         "resource_cost": 1000000,
         "time_cost": 3,
@@ -63,7 +60,6 @@ def generate_threat_actor_scorecards(misp_data):
     # is a bit more complex in that the scores are intended to be absolutes in specific units.
     #
     score_multiplier = {
-        "skill": 0.002,
         "team_size": 0.00001,
         "resource_cost": 2000,
         "time_cost": 0.002,
@@ -75,7 +71,6 @@ def generate_threat_actor_scorecards(misp_data):
     scorecards = {}
     for actor in threat_actors:
         scorecards[actor] = {
-            "skill": 0,
             "team_size": 0,
             "resource_cost": 0,
             "time_cost": 0,
@@ -102,7 +97,6 @@ def generate_threat_actor_scorecards(misp_data):
                         event_actor = galaxy["value"]
 
         if event_actor != unattributed:
-            scorecards[event_actor]["skill"] += scoring.score_skill(event, event_attributes)
             scorecards[event_actor]["team_size"] += scoring.score_team_size(event, event_attributes)
             scorecards[event_actor]["resource_cost"] += scoring.score_resource_cost(event, event_attributes)
             scorecards[event_actor]["time_cost"] += scoring.score_time_cost(event, event_attributes)
@@ -113,7 +107,6 @@ def generate_threat_actor_scorecards(misp_data):
     for actor in threat_actors:
         print("Score card for threat actor: " + actor)
         print("")
-        print("Skill:              " + str(scorecards[actor]["skill"]))
         print("Team size:          " + str(scorecards[actor]["team_size"]))
         print("Resource cost:      " + str(scorecards[actor]["resource_cost"]))
         print("Time cost:          " + str(scorecards[actor]["time_cost"]))

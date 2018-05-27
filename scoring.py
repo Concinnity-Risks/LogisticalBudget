@@ -88,20 +88,6 @@ def score_by_amount_of_external_analysis(event, attributes):
     return score
 
 
-def score_skill(event, attributes):
-    """ Score based on indicators of skill """
-    score = 0
-
-    if event["threat_level_id"] == "1":  # High
-        score += 100
-    elif event["threat_level_id"] == "2":  # Medium
-        score += 50
-    elif event["threat_level_id"] == "3":  # Low
-        score += 1
-
-    return score
-
-
 def score_team_size(event, attributes):
     """ Score based on indicators of team size """
     score = 0
@@ -162,9 +148,8 @@ def score_time_cost(event, attributes):
 def score_logistical_burden(event, attributes):
     """ Score based on indicators of logistical burden """
 
-    skill = score_skill(event, attributes)
     team_size = score_team_size(event, attributes)
     resource_cost = score_resource_cost(event, attributes)
     time_cost = score_time_cost(event, attributes)
 
-    return skill * team_size * (resource_cost + time_cost)
+    return team_size * (resource_cost + time_cost)
