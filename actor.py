@@ -121,7 +121,7 @@ def generate_threat_actor_scorecards(misp_data):
         height = len(threat_actors)
 
         for actor in threat_actors:
-            filename = "scorecard-" + actor
+            filename = "scorecards/scorecard-" + actor
             with open(filename + ".plt", "w") as outfile:
                 # Set the size of the output image (though note that it will be rotated)
                 outfile.write("set terminal png size 720, 1280\n")

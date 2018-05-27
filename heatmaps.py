@@ -37,7 +37,7 @@ def generate_heatmaps(misp_data):
                  "bin_size": 30 if monthly else 7,
                  "scoring_function": scoring.score_by_event_count,
                  "scoring_name": "Threat actor events",
-                 "filename": "heatmap-count-" + ("monthly" if monthly else "weekly"),
+                 "filename": "heatmaps/heatmap-count-" + ("monthly" if monthly else "weekly"),
                  "use_plotly": html
                  })
             sets.append(
@@ -45,7 +45,7 @@ def generate_heatmaps(misp_data):
                  "bin_size": 30 if monthly else 7,
                  "scoring_function": scoring.score_by_event_threat_level,
                  "scoring_name": "Sum of event threat levels (high = 100, medium = 50, low = 1)",
-                 "filename": "heatmap-levels-" + ("monthly" if monthly else "weekly"),
+                 "filename": "heatmaps/heatmap-levels-" + ("monthly" if monthly else "weekly"),
                  "use_plotly": html
                  })
             sets.append(
@@ -53,7 +53,7 @@ def generate_heatmaps(misp_data):
                  "bin_size": 30 if monthly else 7,
                  "scoring_function": scoring.score_by_source_ips,
                  "scoring_name": "Number of source IP addresses implicated",
-                 "filename": "heatmap-ipsrc-" + ("monthly" if monthly else "weekly"),
+                 "filename": "heatmaps/heatmap-ipsrc-" + ("monthly" if monthly else "weekly"),
                  "use_plotly": html
                  })
             sets.append(
@@ -61,7 +61,7 @@ def generate_heatmaps(misp_data):
                  "bin_size": 30 if monthly else 7,
                  "scoring_function": scoring.score_by_destination_ips,
                  "scoring_name": "Number of destination IP addresses implicated",
-                 "filename": "heatmap-ipdst-" + ("monthly" if monthly else "weekly"),
+                 "filename": "heatmaps/heatmap-ipdst-" + ("monthly" if monthly else "weekly"),
                  "use_plotly": html
                  })
             sets.append(
@@ -69,7 +69,7 @@ def generate_heatmaps(misp_data):
                  "bin_size": 30 if monthly else 7,
                  "scoring_function": scoring.score_by_domain_count,
                  "scoring_name": "Number of domains implicated",
-                 "filename": "heatmap-domains-" + ("monthly" if monthly else "weekly"),
+                 "filename": "heatmaps/heatmap-domains-" + ("monthly" if monthly else "weekly"),
                  "use_plotly": html
                  })
             sets.append(
@@ -77,7 +77,7 @@ def generate_heatmaps(misp_data):
                  "bin_size": 30 if monthly else 7,
                  "scoring_function": scoring.score_by_malware_files,
                  "scoring_name": "Numbers of malware files recorded",
-                 "filename": "heatmap-files-" + ("monthly" if monthly else "weekly"),
+                 "filename": "heatmaps/heatmap-files-" + ("monthly" if monthly else "weekly"),
                  "use_plotly": html
                  })
             # This scores nothing against threat actors

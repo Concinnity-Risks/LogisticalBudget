@@ -81,6 +81,9 @@ if __name__ == "__main__":
 
     if args.actor_scores:
         # Produce a score table against various criteria for each threat actor
+        #
+        if not os.path.exists("scorecards"):
+            os.makedirs("scorecards")
         actor.generate_threat_actor_scorecards(misp_data)
 
     elif args.analyse:
@@ -97,4 +100,7 @@ if __name__ == "__main__":
 
     else:
         # Generate the desired heat maps
+        #
+        if not os.path.exists("heatmaps"):
+            os.makedirs("heatmaps")
         heatmaps.generate_heatmaps(misp_data)
