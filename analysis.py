@@ -64,6 +64,6 @@ def analyse(misp_data):
     for category in categories.keys():
         print("Category: " + category)
         for ty in categories[category].keys():
-            print("    Type: " + ty + " count: " +
+            print("    Type: " + ty + " / Count: " +
                   str(categories[category][ty]))
         print("")
