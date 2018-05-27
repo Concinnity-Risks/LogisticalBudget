@@ -61,8 +61,8 @@ def generate_threat_actor_scorecards(misp_data):
     #
     score_multiplier = {
         "team_size": 0.00001,
-        "resource_cost": 2000,
-        "time_cost": 0.002,
+        "resource_cost": 1,
+        "time_cost": 0.0001,
         "logistical_burden": 0.00002
     };
 
