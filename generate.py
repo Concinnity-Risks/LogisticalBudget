@@ -84,7 +84,7 @@ if __name__ == "__main__":
         #
         if not os.path.exists("scorecards"):
             os.makedirs("scorecards")
-        actor.generate_threat_actor_scorecards(misp_data)
+        scorecards.generate_threat_actor_scorecards(misp_data)
 
     elif args.analyse:
         # Perform some basic analysis on the MISP data, which can be useful
