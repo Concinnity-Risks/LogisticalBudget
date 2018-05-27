@@ -63,7 +63,7 @@ def analyse(misp_data):
     print("\nResults of analysis: categories")
     for category in categories.keys():
         print("Category: " + category)
-        for ty in categories[category].keys():
+        for ty in sorted(categories[category].keys(), key=lambda x: -categories[category][x]):
             print("    Type: " + ty + " / Count: " +
                   str(categories[category][ty]))
         print("")
