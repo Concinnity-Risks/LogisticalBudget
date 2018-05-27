@@ -30,7 +30,7 @@ import caching
 import misp
 import analysis
 import heatmaps
-import actor
+import scorecards
 import utility
 
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     parser.add_argument("--dumpcache", dest="dump_cache", action="store_const", const=True, default=False,
          help="Load the contents of the cache.obj file and pretty-print it to a text file named cache.txt")
 
-    parser.add_argument("--actorscores", dest="actor_scores", action="store_const", const=True, default=False,
+    parser.add_argument("--scorecards", dest="scorecards", action="store_const", const=True, default=False,
          help="Show scoring for all threat actors")
 
     parser.add_argument("--listactors", dest="list_actors", action="store_const", const=True, default=False,
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     if total == 0:
         sys.exit("No events returned")
 
-    if args.actor_scores:
+    if args.scorecards:
         # Produce a score table against various criteria for each threat actor
         #
         if not os.path.exists("scorecards"):
