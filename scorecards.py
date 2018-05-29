@@ -143,17 +143,17 @@ def generate_threat_actor_scorecards(misp_data):
                 #
                 outfile.write("set bmargin 10\n")
                 outfile.write("set tmargin 5\n")
-                outfile.write("set lmargin 5\n")
+                outfile.write("set lmargin 8\n")
                 outfile.write("set rmargin 5\n")
 
                 # Produce multiple graphs side-by-side
                 outfile.write("set multiplot layout 1, " + str(len(score_descriptions)) + "\n")
 
-                # Titling is tricky with multiplot: Adding a title to a single graph scales that graph differently
-                # outfile.write("set title \"Logistical burden for threat actor " + actor + "\"\n")
-
                 # Set the graph style
                 outfile.write("set style fill solid\n")
+
+                # Add a title to the scorecard
+                outfile.write("set label 1 \"Logistical burden for threat actor " + actor + "\" offset -7, 0 rotate by 90\n")
 
                 # Now write out the data
                 #
@@ -186,6 +186,8 @@ def generate_threat_actor_scorecards(misp_data):
                     #
                     outfile.write("EOD\n")
                     outfile.write("plot \"$" + score + "\" using 2:xtic(1) ti col lt rgb \"" + score_colour[score] + "\" with boxes\n")
+
+                    outfile.write("unset label 1\n")
 
             # Process the plot into a temporary bitmap
             #
