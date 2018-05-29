@@ -42,6 +42,13 @@ def generate_threat_actor_scorecards(misp_data):
         "logistical_burden": "Logistical Burden"
     };
 
+    score_colour = {
+        "team_size": "orange",
+        "resource_cost": "red",
+        "time_cost": "blue",
+        "logistical_burden": "purple"
+    };
+
     score_units = {
         "team_size": "People",
         "resource_cost": "$",
@@ -140,15 +147,12 @@ def generate_threat_actor_scorecards(misp_data):
                 outfile.write("set rmargin 5\n")
 
                 # Produce multiple graphs side-by-side
-                #
                 outfile.write("set multiplot layout 1, " + str(len(score_descriptions)) + "\n")
 
                 # Titling is tricky with multiplot: Adding a title to a single graph scales that graph differently
                 # outfile.write("set title \"Logistical burden for threat actor " + actor + "\"\n")
 
-                # Set the histogram style
-                #
-                outfile.write("set style histogram columns\n")
+                # Set the graph style
                 outfile.write("set style fill solid\n")
 
                 # Now write out the data
@@ -156,6 +160,11 @@ def generate_threat_actor_scorecards(misp_data):
                 for score in scorecards[actor]:
                     # Rotate the labels so that they are the expected rotation when the output is rotated
                     outfile.write("set xtics right rotate by 90\n")
+
+                    # Specify the X-axis parameters
+                    #
+                    outfile.write("set xrange [ -1.0 : 1.0 ]\n")
+                    outfile.write("set boxwidth 0.75\n")
 
                     # Specify the Y-axis parameters
                     #
@@ -176,7 +185,7 @@ def generate_threat_actor_scorecards(misp_data):
                     # End the data, and plot
                     #
                     outfile.write("EOD\n")
-                    outfile.write("plot \"$" + score + "\" using 2:xtic(1) ti col with histograms\n")
+                    outfile.write("plot \"$" + score + "\" using 2:xtic(1) ti col lt rgb \"" + score_colour[score] + "\" with boxes\n")
 
             # Process the plot into a temporary bitmap
             #
