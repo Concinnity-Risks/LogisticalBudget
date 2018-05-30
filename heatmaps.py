@@ -22,73 +22,74 @@ import scoring
 import utility
 
 
-def generate_heatmaps(misp_data):
+def generate_heatmaps(misp_data, num_days, bin_size, bin_name):
     """
     Generate heatmaps for various criteria
 
     misp_data - The events and attributes loaded from the MISP server
+    num_days - The number of days to graph
+    bin_size - The number of days in each graph block
+    bin_name - The name for a graph block
     """
 
     sets = []
     for html in [True, False]:
-        for monthly in [False, True]:
-            sets.append(
-                {"num_days": 15 * 30 if monthly else 3 * 30,
-                 "bin_size": 30 if monthly else 7,
-                 "scoring_function": scoring.score_by_event_count,
-                 "scoring_name": "Threat actor events",
-                 "filename": "heatmaps/heatmap-count-" + ("monthly" if monthly else "weekly"),
-                 "use_plotly": html
-                 })
-            sets.append(
-                {"num_days": 15 * 30 if monthly else 3 * 30,
-                 "bin_size": 30 if monthly else 7,
-                 "scoring_function": scoring.score_by_event_threat_level,
-                 "scoring_name": "Sum of event threat levels (high = 100, medium = 50, low = 1)",
-                 "filename": "heatmaps/heatmap-levels-" + ("monthly" if monthly else "weekly"),
-                 "use_plotly": html
-                 })
-            sets.append(
-                {"num_days": 15 * 30 if monthly else 3 * 30,
-                 "bin_size": 30 if monthly else 7,
-                 "scoring_function": scoring.score_by_source_ips,
-                 "scoring_name": "Number of source IP addresses implicated",
-                 "filename": "heatmaps/heatmap-ipsrc-" + ("monthly" if monthly else "weekly"),
-                 "use_plotly": html
-                 })
-            sets.append(
-                {"num_days": 15 * 30 if monthly else 3 * 30,
-                 "bin_size": 30 if monthly else 7,
-                 "scoring_function": scoring.score_by_destination_ips,
-                 "scoring_name": "Number of destination IP addresses implicated",
-                 "filename": "heatmaps/heatmap-ipdst-" + ("monthly" if monthly else "weekly"),
-                 "use_plotly": html
-                 })
-            sets.append(
-                {"num_days": 15 * 30 if monthly else 3 * 30,
-                 "bin_size": 30 if monthly else 7,
-                 "scoring_function": scoring.score_by_domain_count,
-                 "scoring_name": "Number of domains implicated",
-                 "filename": "heatmaps/heatmap-domains-" + ("monthly" if monthly else "weekly"),
-                 "use_plotly": html
-                 })
-            sets.append(
-                {"num_days": 15 * 30 if monthly else 3 * 30,
-                 "bin_size": 30 if monthly else 7,
-                 "scoring_function": scoring.score_by_malware_files,
-                 "scoring_name": "Numbers of malware files recorded",
-                 "filename": "heatmaps/heatmap-files-" + ("monthly" if monthly else "weekly"),
-                 "use_plotly": html
-                 })
-            # This scores nothing against threat actors
-            # sets.append(
-            #     {"num_days": 3 * 30 if monthly else 3 * 30,
-            #      "bin_size": 30 if monthly else 7,
-            #      "scoring_function": scoring.score_by_amount_of_external_analysis,
-            #      "scoring_name": "Numbers of amount of external analysis recorded",
-            #      "filename": "heatmap-analysis-" + ("monthly" if monthly else "weekly"),
-            #      "use_plotly": html
-            #      })
+        sets.append(
+            {"num_days": num_days,
+             "bin_size": bin_size,
+             "scoring_function": scoring.score_by_event_count,
+             "scoring_name": "Threat actor events",
+             "filename": "heatmaps/heatmap-count-" + bin_name,
+             "use_plotly": html
+             })
+        sets.append(
+            {"num_days": num_days,
+             "bin_size": bin_size,
+             "scoring_function": scoring.score_by_event_threat_level,
+             "scoring_name": "Sum of event threat levels (high = 100, medium = 50, low = 1)",
+             "filename": "heatmaps/heatmap-levels-" + bin_name,
+             "use_plotly": html
+             })
+        sets.append(
+            {"num_days": num_days,
+             "bin_size": bin_size,
+             "scoring_function": scoring.score_by_source_ips,
+             "scoring_name": "Number of source IP addresses implicated",
+             "filename": "heatmaps/heatmap-ipsrc-" + bin_name,
+             "use_plotly": html
+             })
+        sets.append(
+            {"num_days": num_days,
+             "bin_size": bin_size,
+             "scoring_function": scoring.score_by_destination_ips,
+             "scoring_name": "Number of destination IP addresses implicated",
+             "filename": "heatmaps/heatmap-ipdst-" + bin_name,
+             "use_plotly": html
+             })
+        sets.append(
+            {"num_days": num_days,
+             "bin_size": bin_size,
+             "scoring_function": scoring.score_by_domain_count,
+             "scoring_name": "Number of domains implicated",
+             "filename": "heatmaps/heatmap-domains-" + bin_name,
+             "use_plotly": html
+             })
+        sets.append(
+            {"num_days": num_days,
+             "bin_size": bin_size,
+             "scoring_function": scoring.score_by_malware_files,
+             "scoring_name": "Numbers of malware files recorded",
+             "filename": "heatmaps/heatmap-files-" + bin_name,
+             "use_plotly": html
+             })
+        sets.append(
+            {"num_days": num_days,
+             "bin_size": bin_size,
+             "scoring_function": scoring.score_by_amount_of_external_analysis,
+             "scoring_name": "Amount of external analysis recorded",
+             "filename": "heatmaps/heatmap-analysis-" + bin_name,
+             "use_plotly": html
+             })
 
     for set in sets:
         generate_by_threat_actor(misp_data, **set)

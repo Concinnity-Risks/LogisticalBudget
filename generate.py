@@ -103,4 +103,5 @@ if __name__ == "__main__":
         #
         if not os.path.exists("heatmaps"):
             os.makedirs("heatmaps")
-        heatmaps.generate_heatmaps(misp_data)
+        heatmaps.generate_heatmaps(misp_data, num_days = 15 * 30, bin_size = 30, bin_name = "monthly")
+        heatmaps.generate_heatmaps(misp_data, num_days = 3 * 30, bin_size = 7, bin_name = "weekly")
