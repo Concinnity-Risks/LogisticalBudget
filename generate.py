@@ -55,6 +55,12 @@ if __name__ == "__main__":
     parser.add_argument("--dumpcache", dest="dump_cache", action="store_const", const=True, default=False,
          help="Load the contents of the cache.obj file and pretty-print it to a text file named cache.txt")
 
+    parser.add_argument("--numdays", metavar="DAYS", dest="num_days", type=int, default="0",
+         help="Set the number of days of history for heatmaps")
+
+    parser.add_argument("--binsize", metavar="DAYS", dest="bin_size", type=int, default="0",
+         help="Set the number of days for each bin for heatmaps")
+
     parser.add_argument("--scorecards", dest="scorecards", action="store_const", const=True, default=False,
          help="Show scoring for all threat actors")
 
@@ -64,7 +70,19 @@ if __name__ == "__main__":
     parser.add_argument("--analyse", dest="analyse", action="store_const", const=True, default=False,
          help="Produce an analysis of structure of the MISP data")
 
+    # Parse command-line arguments and then perform some extra validation
+    #
     args = parser.parse_args()
+    if args.num_days != 0 and args.bin_size == 0:
+        print("When specifying the number of days, the bin size must be specified")
+        sys.exit(1)
+    if args.num_days == 0 and args.bin_size != 0:
+        print("When specifying the bin size, the number of days must be specified")
+        sys.exit(1)
+    if args.num_days % args.bin_size != 0:
+        print("The number of days should be a multiple of the bin size to ensure that the")
+        print("left hand side of the graph is not misleading")
+        sys.exit(1)
 
     # If requested, pretty print the cache contents into a file
     #
@@ -103,5 +121,8 @@ if __name__ == "__main__":
         #
         if not os.path.exists("heatmaps"):
             os.makedirs("heatmaps")
-        heatmaps.generate_heatmaps(misp_data, num_days = 15 * 30, bin_size = 30, bin_name = "monthly")
-        heatmaps.generate_heatmaps(misp_data, num_days = 3 * 30, bin_size = 7, bin_name = "weekly")
+        if args.num_days != 0 and args.bin_size != 0:
+            heatmaps.generate_heatmaps(misp_data, num_days = args.num_days, bin_size = args.bin_size, bin_name = "custom")
+        else:
+            heatmaps.generate_heatmaps(misp_data, num_days = 15 * 30, bin_size = 30, bin_name = "monthly")
+            heatmaps.generate_heatmaps(misp_data, num_days = 3 * 30, bin_size = 7, bin_name = "weekly")
