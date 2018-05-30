@@ -5,6 +5,7 @@
 #
 import os
 import subprocess
+import math
 
 # For progress bars
 from tqdm import tqdm
@@ -61,6 +62,13 @@ def generate_threat_actor_scorecards(misp_data):
         "resource_cost": 1000000,
         "time_cost": 3,
         "logistical_burden": 1000
+    };
+
+    score_type = {
+        "team_size": "linear",
+        "resource_cost": "linear",
+        "time_cost": "linear",
+        "logistical_burden": "linear"
     };
 
     # Unlike the heatmap scores, which are used for comparative analysis of the threat actors, this
@@ -180,12 +188,20 @@ def generate_threat_actor_scorecards(misp_data):
                     #
                     outfile.write("$" + score + " << EOD\n\"\" 0\n")
                     val = scorecards[actor][score] * score_multiplier[score]
+                    if score_type[score] == "linear":
+                        pass
+                    elif score_type[score] == "log":
+                        if val != 0:
+                            val = math.log(val)
+                    else:
+                        raise RuntimeError("Unexpected score_type")
                     outfile.write("\"" + str(score_descriptions[score]) + "\" " + str(val) + "\n")
+                    outfile.write("EOD\n")
 
                     # End the data, and plot
                     #
-                    outfile.write("EOD\n")
-                    outfile.write("plot \"$" + score + "\" using 2:xtic(1) ti col lt rgb \"" + score_colour[score] + "\" with boxes\n")
+                    outfile.write("plot \"$" + score + "\" using 2:xtic(1) ti col lt rgb \"" +
+                        score_colour[score] + "\" with boxes\n")
 
                     outfile.write("unset label 1\n")
 
