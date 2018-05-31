@@ -162,8 +162,10 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                 # Set the filename of the output image
                 outfile.write("set output \"" + filename + ".tmp.png\"\n")
 
-                # Don't draw a key
+                # Don't draw a key or a colour box
+                #
                 outfile.write("unset key\n")
+                outfile.write("unset colorbox\n")
 
                 # Set the bottom (left after rotation) margin so that score names are not truncated
                 #
@@ -176,7 +178,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                 outfile.write("set multiplot layout 1, " + str(len(score_descriptions)) + "\n")
 
                 # Set the graph style
-                outfile.write("set style fill solid\n")
+                outfile.write("set style fill solid noborder\n")
 
                 # Rotate the labels so that they are the expected rotation when the output is rotated
                 #
@@ -186,7 +188,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                 # Specify the X-axis parameters
                 #
                 outfile.write("set xrange [ -1.0 : 1.0 ]\n")
-                outfile.write("set boxwidth 0.75\n")
+                outfile.write("set boxwidth 1.0\n")
 
                 # Add a title to the scorecard
                 #
