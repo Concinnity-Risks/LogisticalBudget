@@ -178,6 +178,16 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                 # Set the graph style
                 outfile.write("set style fill solid\n")
 
+                # Rotate the labels so that they are the expected rotation when the output is rotated
+                #
+                outfile.write("set xtics right rotate by 90\n")
+                outfile.write("set ytics right rotate by 90\n")
+
+                # Specify the X-axis parameters
+                #
+                outfile.write("set xrange [ -1.0 : 1.0 ]\n")
+                outfile.write("set boxwidth 0.75\n")
+
                 # Add a title to the scorecard
                 #
                 title = "Logistical burden for threat actor " + actor
@@ -190,17 +200,8 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                 # Now write out the data
                 #
                 for score in scorecards[actor]:
-                    # Rotate the labels so that they are the expected rotation when the output is rotated
-                    outfile.write("set xtics right rotate by 90\n")
-
-                    # Specify the X-axis parameters
-                    #
-                    outfile.write("set xrange [ -1.0 : 1.0 ]\n")
-                    outfile.write("set boxwidth 0.75\n")
-
                     # Specify the Y-axis parameters
                     #
-                    outfile.write("set ytics right rotate by 90\n")
                     outfile.write("set ylabel \"" + score_units[score] + "\" offset 3, 0\n")
                     outfile.write("set yrange [ 0.0 : " + str(score_range[score]) + " ]\n")
                     if score_range[score] < 5.0:
