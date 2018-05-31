@@ -35,6 +35,8 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
     events = misp_data["events"]
     attributes = misp_data["attributes"]
 
+    epoch = datetime.datetime.utcfromtimestamp(0)
+
     # Generate dictionary of threat actors
     threat_actors = utility.identify_threat_actors(misp_data, initial={})
 
@@ -119,7 +121,6 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
             if "timestamp" in event:
                 seconds_since_epoch = int(event["timestamp"])
                 if seconds_since_epoch > 1:
-                    epoch = datetime.datetime.utcfromtimestamp(0)
                     event_time = datetime.datetime.fromtimestamp(seconds_since_epoch)
 
                     reject = False
@@ -178,7 +179,13 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                 outfile.write("set style fill solid\n")
 
                 # Add a title to the scorecard
-                outfile.write("set label 1 \"Logistical burden for threat actor " + actor + "\" offset -7, 0 rotate by 90\n")
+                #
+                title = "Logistical burden for threat actor " + actor
+                if start_date != epoch:
+                    title += " starting at " + start_date.strftime("%Y-%m-%d")
+                if end_date != epoch:
+                    title += " ending at " + end_date.strftime("%Y-%m-%d")
+                outfile.write("set label 1 \"" + title + "\" offset -7, 0 rotate by 90\n")
 
                 # Now write out the data
                 #
