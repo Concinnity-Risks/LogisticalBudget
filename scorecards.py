@@ -224,7 +224,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
 
                     # End the data, and plot
                     #
-                    outfile.write("plot \"$" + score + "\" using 2:xtic(1) ti col lt rgb \"" +
+                    outfile.write("plot \"$" + score + "\" using 2:xtic(1) title column linetype rgb \"" +
                         score_colour[score] + "\" with boxes\n")
 
                     outfile.write("unset label 1\n")
