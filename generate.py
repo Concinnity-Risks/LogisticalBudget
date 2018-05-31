@@ -9,6 +9,7 @@ import os
 import json
 import pprint
 import argparse
+import datetime
 
 # Use local Python modules if requested
 #
@@ -34,6 +35,15 @@ import scorecards
 import utility
 
 
+# A helper for parsing date arguments on the command-line
+#
+def validate_date(input_string):
+    try:
+        return datetime.datetime.strptime(input_string, "%Y-%m-%d")
+    except ValueError:
+        error = "Not a valid date: '{0}'.".format(input_string)
+        raise argparse.ArgumentTypeError(error)
+
 #
 # Main program
 #
@@ -46,6 +56,8 @@ if __name__ == "__main__":
 
     # Process command-line arguments
     #
+    epoch = datetime.datetime.utcfromtimestamp(0)
+
     parser = argparse.ArgumentParser(description="With no arguments, the cached data will be used to generate " +
         "heatmaps showing threat actors against time, scored by various criteria.")
 
@@ -63,6 +75,12 @@ if __name__ == "__main__":
 
     parser.add_argument("--scorecards", dest="scorecards", action="store_const", const=True, default=False,
          help="Show scoring for all threat actors")
+
+    parser.add_argument("--startdate", metavar="DATE", dest="start_date", type=validate_date, default=epoch,
+         help="Set the start date for threat actor scorecards, in the format YYYY-MM-DD")
+
+    parser.add_argument("--enddate", metavar="DATE", dest="end_date", type=validate_date, default=epoch,
+         help="Set the end date for threat actor scorecards, in the format YYYY-MM-DD")
 
     parser.add_argument("--listactors", dest="list_actors", action="store_const", const=True, default=False,
          help="Produce list of the known threat actors in the data")
@@ -102,7 +120,7 @@ if __name__ == "__main__":
         #
         if not os.path.exists("scorecards"):
             os.makedirs("scorecards")
-        scorecards.generate_threat_actor_scorecards(misp_data)
+        scorecards.generate_threat_actor_scorecards(misp_data, args.start_date, args.end_date)
 
     elif args.analyse:
         # Perform some basic analysis on the MISP data, which can be useful

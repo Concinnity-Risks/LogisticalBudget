@@ -6,6 +6,7 @@
 import os
 import subprocess
 import math
+import datetime
 
 # For progress bars
 from tqdm import tqdm
@@ -16,16 +17,19 @@ import scoring
 import utility
 
 
-# TODO: Title for the scorecard
 # TODO: More representative scoring functions
 # TODO: Error bars (or similar)
 
 
-def generate_threat_actor_scorecards(misp_data):
+def generate_threat_actor_scorecards(misp_data, start_date, end_date):
     """
     Generate a score card for the specified threat actor
 
     misp_data - The events and attributes loaded from the MISP server
+    start_date - A datetime object with the earliest date of events to be used when scoring,
+        use the datetime epoch to ignore the date
+    end_date - A datetime object with the latest date of events to be used when scoring,
+        use the datetime epoch to ignore the date
     """
 
     events = misp_data["events"]
@@ -112,10 +116,23 @@ def generate_threat_actor_scorecards(misp_data):
                         event_actor = galaxy["value"]
 
         if event_actor != unattributed:
-            scorecards[event_actor]["team_size"] += scoring.score_team_size(event, event_attributes)
-            scorecards[event_actor]["resource_cost"] += scoring.score_resource_cost(event, event_attributes)
-            scorecards[event_actor]["time_cost"] += scoring.score_time_cost(event, event_attributes)
-            scorecards[event_actor]["logistical_burden"] += scoring.score_logistical_burden(event, event_attributes)
+            if "timestamp" in event:
+                seconds_since_epoch = int(event["timestamp"])
+                if seconds_since_epoch > 1:
+                    epoch = datetime.datetime.utcfromtimestamp(0)
+                    event_time = datetime.datetime.fromtimestamp(seconds_since_epoch)
+
+                    reject = False
+                    if start_date != epoch and event_time < start_date:
+                        reject = True
+                    if end_date != epoch and event_time > end_date:
+                        reject = True
+
+                    if not reject:
+                        scorecards[event_actor]["team_size"] += scoring.score_team_size(event, event_attributes)
+                        scorecards[event_actor]["resource_cost"] += scoring.score_resource_cost(event, event_attributes)
+                        scorecards[event_actor]["time_cost"] += scoring.score_time_cost(event, event_attributes)
+                        scorecards[event_actor]["logistical_burden"] += scoring.score_logistical_burden(event, event_attributes)
 
     # Now generate our score card as a sumple text output for now
     #
