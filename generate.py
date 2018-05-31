@@ -79,7 +79,7 @@ if __name__ == "__main__":
     if args.num_days == 0 and args.bin_size != 0:
         print("When specifying the bin size, the number of days must be specified")
         sys.exit(1)
-    if args.num_days % args.bin_size != 0:
+    if args.bin_size != 0 and args.num_days % args.bin_size != 0:
         print("The number of days should be a multiple of the bin size to ensure that the")
         print("left hand side of the graph is not misleading")
         sys.exit(1)
