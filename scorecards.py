@@ -18,7 +18,6 @@ import utility
 
 
 # TODO: More representative scoring functions
-# TODO: Error bars (or similar)
 
 
 def generate_threat_actor_scorecards(misp_data, start_date, end_date):
@@ -49,9 +48,10 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
         "logistical_burden": "Logistical Burden"
     };
 
+    # TODO: Work out why multiplots with multiple palettes only use the first palette
     score_colour = {
-        "team_size": "orange",
-        "resource_cost": "red",
+        "team_size": "red",
+        "resource_cost": "orange",
         "time_cost": "blue",
         "logistical_burden": "purple"
     };
@@ -137,14 +137,15 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
 
     # Now generate our score card as a sumple text output for now
     #
-    for actor in threat_actors:
-        print("Score card for threat actor: " + actor)
-        print("")
-        print("Team size:          " + str(scorecards[actor]["team_size"]))
-        print("Resource cost:      " + str(scorecards[actor]["resource_cost"]))
-        print("Time cost:          " + str(scorecards[actor]["time_cost"]))
-        print("Logistical burden:  " + str(scorecards[actor]["logistical_burden"]))
-        print("")
+    if False:
+        for actor in threat_actors:
+            print("Score card for threat actor: " + actor)
+            print("")
+            print("Team size:          " + str(scorecards[actor]["team_size"]))
+            print("Resource cost:      " + str(scorecards[actor]["resource_cost"]))
+            print("Time cost:          " + str(scorecards[actor]["time_cost"]))
+            print("Logistical burden:  " + str(scorecards[actor]["logistical_burden"]))
+            print("")
 
     # Generate a chart for each threat actor
     #
@@ -182,12 +183,12 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
 
                 # Rotate the labels so that they are the expected rotation when the output is rotated
                 #
-                outfile.write("set xtics right rotate by 90\n")
+                outfile.write("unset xtics\n")
                 outfile.write("set ytics right rotate by 90\n")
 
                 # Specify the X-axis parameters
                 #
-                outfile.write("set xrange [ -1.0 : 1.0 ]\n")
+                outfile.write("set xrange [ 0.0 : 2.0 ]\n")
                 outfile.write("set boxwidth 1.0\n")
 
                 # Add a title to the scorecard
@@ -211,9 +212,20 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                     else:
                         outfile.write("set format y \"%6.0f\"\n")
 
+                    # Set the palette for this score
+                    #
+                    outfile.write("set palette defined (0.0 \"grey\", " +
+                        str(score_range[score] * 0.5) + " \"grey\", " +
+                        str(score_range[score] * 0.75) + " \"" + score_colour[score] + "\", " +
+                        str(score_range[score]) + " \"white\")\n")
+
+                    # Set the score description label
+                    # TODO: Work out why rotate does not work in this case
+                    outfile.write("set xlabel \"" + score_descriptions[score] + "\" offset 0, -2 rotate by 90\n")
+
                     # Output the scaled score
                     #
-                    outfile.write("$" + score + " << EOD\n\"\" 0\n")
+                    outfile.write("$" + score + " << EOD\n")
                     val = scorecards[actor][score] * score_multiplier[score]
                     if score_type[score] == "linear":
                         pass
@@ -222,13 +234,13 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                             val = math.log(val)
                     else:
                         raise RuntimeError("Unexpected score_type")
-                    outfile.write("\"" + str(score_descriptions[score]) + "\" " + str(val) + "\n")
+                    outfile.write("1 " + str(val) + "\n")
                     outfile.write("EOD\n")
 
                     # End the data, and plot
                     #
-                    outfile.write("plot \"$" + score + "\" using 2:xtic(1) title column linetype rgb \"" +
-                        score_colour[score] + "\" with boxes\n")
+                    outfile.write("plot for [i=1000:1:-1] \"$" + score + "\" using 1:(($2/1000)*i):(($2/1000)*i) " +
+                        "notitle with boxes fillcolor palette\n")
 
                     outfile.write("unset label 1\n")
 
