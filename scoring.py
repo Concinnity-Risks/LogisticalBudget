@@ -129,28 +129,28 @@ def score_resource_cost(event, attributes):
         if attribute["category"] == "Network activity":
             ty = attribute["type"]
             if ty == "domain":
-                score += 100
+                score += 20
             elif ty == "hostname" or ty == "url" or ty == "ip-src":
-                score += 50
+                score += 20
         elif attribute["category"] == "Payload delivery" or attribute["category"] == "Payload installation" or \
              attribute["category"] == "Artifacts dropped":
             ty = attribute["type"]
             if ty == "vulnerability":
-                score += 100
+                score += 10
             elif ty == "malware-sample":
-                score += 50
+                score += 10
             elif ty == "filename" or ty == "filename|md5" or ty == "filename|sha1" or ty == "filename|sha256" or ty == "attachment":
-                score += 1
+                score += 10
             elif ty == "md5" or ty == "sha1" or ty == "sha256":
-                score += 1
+                score += 10
         elif attribute["category"] == "External analysis":
             ty = attribute["type"]
             if ty == "vulnerability":
-                score += 100
+                score += 10000
             elif ty == "filename" or ty == "filename|md5" or ty == "filename|sha1" or ty == "filename|sha256":
-                score += 1
+                score += 10
             elif ty == "md5" or ty == "sha1" or ty == "sha256":
-                score += 1
+                score += 10
 
     return score
 
@@ -167,32 +167,32 @@ def score_time_cost(event, attributes):
         if attribute["category"] == "Network activity":
             ty = attribute["type"]
             if ty == "domain":
-                score += 100
+                score += 1000
             elif ty == "hostname" or ty == "url" or ty == "ip-src":
-                score += 50
+                score += 500
         elif attribute["category"] == "Payload delivery" or attribute["category"] == "Payload installation" or \
              attribute["category"] == "Artifacts dropped":
             ty = attribute["type"]
             if ty == "vulnerability":
-                score += 100
+                score += 10000
             elif ty == "malware-sample":
-                score += 50
+                score += 5000
             elif ty == "filename" or ty == "filename|md5" or ty == "filename|sha1" or ty == "filename|sha256" or ty == "attachment":
-                score += 1
+                score += 10
             elif ty == "md5" or ty == "sha1" or ty == "sha256":
-                score += 1
+                score += 10
         elif attribute["category"] == "External analysis":
             ty = attribute["type"]
             if ty == "vulnerability":
-                score += 1000
+                score += 10000
             elif ty == "filename" or ty == "filename|md5" or ty == "filename|sha1" or ty == "filename|sha256":
-                score += 100
+                score += 10
             elif ty == "md5" or ty == "sha1" or ty == "sha256":
-                score += 100
+                score += 10
             elif ty == "comment":
-                score += 1
+                score += 100
             elif ty == "link" or ty == "url":
-                score += 1
+                score += 100
 
     return score
 
