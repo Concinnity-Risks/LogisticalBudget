@@ -70,21 +70,21 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
         "logistical_burden": 1000
     };
 
-    score_type = {
-        "team_size": "linear",
-        "resource_cost": "linear",
-        "time_cost": "linear",
-        "logistical_burden": "linear"
+    score_type = { # linear or log
+        "team_size": "log",
+        "resource_cost": "log",
+        "time_cost": "log",
+        "logistical_burden": "log"
     };
 
     # Unlike the heatmap scores, which are used for comparative analysis of the threat actors, this
     # is a bit more complex in that the scores are intended to be absolutes in specific units.
     #
     score_multiplier = {
-        "team_size": 0.00001,
-        "resource_cost": 1,
-        "time_cost": 0.0001,
-        "logistical_burden": 0.00002
+        "team_size": 2,
+        "resource_cost": 50000,
+        "time_cost": 0.2,
+        "logistical_burden": 50.0
     };
 
     # Generate an initial collection of score cards
@@ -226,7 +226,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                     # Output the scaled score
                     #
                     outfile.write("$" + score + " << EOD\n")
-                    val = scorecards[actor][score] * score_multiplier[score]
+                    val = scorecards[actor][score]
                     if score_type[score] == "linear":
                         pass
                     elif score_type[score] == "log":
@@ -234,7 +234,8 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                             val = math.log(val)
                     else:
                         raise RuntimeError("Unexpected score_type")
-                    outfile.write("1 " + str(val) + "\n")
+                    val = val * score_multiplier[score]
+                    outfile.write("1 " + str(val / 0.75) + "\n")
                     outfile.write("EOD\n")
 
                     # End the data, and plot
