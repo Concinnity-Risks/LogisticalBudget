@@ -72,7 +72,6 @@ def score_by_malware_files(event, attributes):
     return score
 
 
-# TODO: Review this now that the type comparisons have been fixed
 def score_by_amount_of_external_analysis(event, attributes):
     """ Score based on amount of external analysis recorded """
     score = 0
