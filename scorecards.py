@@ -45,7 +45,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
         "team_size": "Team Size",
         "resource_cost": "Resource Cost",
         "time_cost": "Time Cost",
-        "logistical_burden": "Logistical Burden"
+        "logistical_budget": "Logistical Budget"
     };
 
     # TODO: Work out why multiplots with multiple palettes only use the first palette
@@ -53,28 +53,28 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
         "team_size": "red",
         "resource_cost": "orange",
         "time_cost": "blue",
-        "logistical_burden": "purple"
+        "logistical_budget": "purple"
     };
 
     score_units = {
         "team_size": "People",
         "resource_cost": "$",
         "time_cost": "Years",
-        "logistical_burden": ""
+        "logistical_budget": ""
     };
 
     score_range = {
         "team_size": 30,
         "resource_cost": 1000000,
         "time_cost": 3,
-        "logistical_burden": 1000
+        "logistical_budget": 1000
     };
 
     score_type = { # linear or log
         "team_size": "log",
         "resource_cost": "log",
         "time_cost": "log",
-        "logistical_burden": "log"
+        "logistical_budget": "log"
     };
 
     # Unlike the heatmap scores, which are used for comparative analysis of the threat actors, this
@@ -84,7 +84,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
         "team_size": 2,
         "resource_cost": 50000,
         "time_cost": 0.1,
-        "logistical_burden": 50.0
+        "logistical_budget": 50.0
     };
 
     # Generate an initial collection of score cards
@@ -95,7 +95,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
             "team_size": 0,
             "resource_cost": 0,
             "time_cost": 0,
-            "logistical_burden": 0
+            "logistical_budget": 0
         };
 
     # Scan the events by actor and timestamp
@@ -133,7 +133,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                         scorecards[event_actor]["team_size"] += scoring.score_team_size(event, event_attributes)
                         scorecards[event_actor]["resource_cost"] += scoring.score_resource_cost(event, event_attributes)
                         scorecards[event_actor]["time_cost"] += scoring.score_time_cost(event, event_attributes)
-                        scorecards[event_actor]["logistical_burden"] += scoring.score_logistical_burden(event, event_attributes)
+                        scorecards[event_actor]["logistical_budget"] += scoring.score_logistical_budget(event, event_attributes)
 
     # Now generate our score card as a sumple text output for now
     #
@@ -144,7 +144,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
             print("Team size:          " + str(scorecards[actor]["team_size"]))
             print("Resource cost:      " + str(scorecards[actor]["resource_cost"]))
             print("Time cost:          " + str(scorecards[actor]["time_cost"]))
-            print("Logistical burden:  " + str(scorecards[actor]["logistical_burden"]))
+            print("Logistical budget:  " + str(scorecards[actor]["logistical_budget"]))
             print("")
 
     # Generate a chart for each threat actor
@@ -193,7 +193,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
 
                 # Add a title to the scorecard
                 #
-                title = "Logistical burden for threat actor " + actor
+                title = "Logistical budget for threat actor " + actor
                 if start_date != epoch:
                     title += " starting at " + start_date.strftime("%Y-%m-%d")
                 if end_date != epoch:

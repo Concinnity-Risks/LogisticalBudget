@@ -197,9 +197,9 @@ def score_time_cost(event, attributes):
     return score
 
 
-def score_logistical_burden(event, attributes):
+def score_logistical_budget(event, attributes):
     """
-    Score based on indicators of logistical burden (WIP)
+    Score based on indicators of logistical budget (WIP)
 
     This is currently factoring in time and money
     """
