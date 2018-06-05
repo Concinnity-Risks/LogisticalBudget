@@ -63,7 +63,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
     };
 
     score_range = {
-        "team_size": 30,
+        "team_size": 500,
         "resource_cost": 1000000,
         "time_cost": 3,
         "logistical_budget": 1000
@@ -80,7 +80,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
     # is a bit more complex in that the scores are intended to be absolutes in specific units.
     #
     score_multiplier = {
-        "team_size": 2,
+        "team_size": 40,
         "resource_cost": 50000,
         "time_cost": 0.1,
         "logistical_budget": 50.0
