@@ -20,11 +20,42 @@ import utility
 # TODO: More representative scoring functions
 
 
-def generate_threat_actor_scorecards(misp_data, start_date, end_date):
+def generate_threat_actor_scorecards(misp_data, directory, start_date, end_date):
     """
-    Generate a score card for the specified threat actor
+    Generate a score card for each threat actor
 
     misp_data - The events and attributes loaded from the MISP server
+    directory - The name of the directory to store the output in
+    start_date - A datetime object with the earliest date of events to be used when scoring,
+        use the datetime epoch to ignore the date
+    end_date - A datetime object with the latest date of events to be used when scoring,
+        use the datetime epoch to ignore the date
+    """
+    generate_scorecards(misp_data, directory, "threat-actor", "threat actor", start_date, end_date)
+
+
+def generate_ransomware_scorecards(misp_data, directory, start_date, end_date):
+    """
+    Generate a score card for each ransomware
+
+    misp_data - The events and attributes loaded from the MISP server
+    directory - The name of the directory to store the output in
+    start_date - A datetime object with the earliest date of events to be used when scoring,
+        use the datetime epoch to ignore the date
+    end_date - A datetime object with the latest date of events to be used when scoring,
+        use the datetime epoch to ignore the date
+    """
+    generate_scorecards(misp_data, directory, "ransomware", "ransomware", start_date, end_date)
+
+
+def generate_scorecards(misp_data, directory, galaxy_type, entry_description, start_date, end_date):
+    """
+    Generate a score card for each entry (e.g. threat actor or ransomware)
+
+    misp_data - The events and attributes loaded from the MISP server
+    directory - The name of the directory to store the output in
+    galaxy_type - The type of the galaxy to look at
+    entry_description - How we refer to the galaxy type in human-readable terms
     start_date - A datetime object with the earliest date of events to be used when scoring,
         use the datetime epoch to ignore the date
     end_date - A datetime object with the latest date of events to be used when scoring,
@@ -36,8 +67,8 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
 
     epoch = datetime.datetime.utcfromtimestamp(0)
 
-    # Generate dictionary of threat actors
-    threat_actors = utility.identify_threat_actors(misp_data, initial={})
+    # Generate dictionary of entries
+    entries = utility.identify_galaxy_entries(misp_data, galaxy_type, initial={})
 
     # Set up the score characteristics
     #
@@ -99,15 +130,15 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
     # Generate an initial collection of score cards
     #
     scorecards = {}
-    for actor in threat_actors:
-        scorecards[actor] = {
+    for entry in entries:
+        scorecards[entry] = {
             "team_size": 0,
             "resource_cost": 0,
             "time_cost": 0,
             "logistical_budget": 0
         };
 
-    # Scan the events by actor and timestamp
+    # Scan the events by entry and timestamp
     #
     for event in tqdm(events):
         event_id = int(event["id"])
@@ -117,16 +148,16 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
             event_attributes = []
 
         unattributed = "Unattributed"
-        event_actor = unattributed
+        event_entry = unattributed
 
         if "GalaxyCluster" in event:
             galaxycluster = event["GalaxyCluster"]
             for galaxy in galaxycluster:
                 if "Galaxy" in galaxy:
-                    if galaxy["type"] == "threat-actor":
-                        event_actor = galaxy["value"]
+                    if galaxy["type"] == galaxy_type:
+                        event_entry = galaxy["value"]
 
-        if event_actor != unattributed:
+        if event_entry != unattributed:
             if "timestamp" in event:
                 seconds_since_epoch = int(event["timestamp"])
                 if seconds_since_epoch > 1:
@@ -139,32 +170,32 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                         reject = True
 
                     if not reject:
-                        scorecards[event_actor]["team_size"] += scoring.score_team_size(event, event_attributes)
-                        scorecards[event_actor]["resource_cost"] += scoring.score_resource_cost(event, event_attributes)
-                        scorecards[event_actor]["time_cost"] += scoring.score_time_cost(event, event_attributes)
-                        scorecards[event_actor]["logistical_budget"] += scoring.score_logistical_budget(event, event_attributes)
+                        scorecards[event_entry]["team_size"] += scoring.score_team_size(event, event_attributes)
+                        scorecards[event_entry]["resource_cost"] += scoring.score_resource_cost(event, event_attributes)
+                        scorecards[event_entry]["time_cost"] += scoring.score_time_cost(event, event_attributes)
+                        scorecards[event_entry]["logistical_budget"] += scoring.score_logistical_budget(event, event_attributes)
 
     # Now generate our score card as a sumple text output for now
     #
     if False:
-        for actor in threat_actors:
-            print("Score card for threat actor: " + actor)
+        for entry in entries:
+            print("Score card for " + entry_description + ": " + entry)
             print("")
-            print("Team size:          " + str(scorecards[actor]["team_size"]))
-            print("Resource cost:      " + str(scorecards[actor]["resource_cost"]))
-            print("Time cost:          " + str(scorecards[actor]["time_cost"]))
-            print("Logistical budget:  " + str(scorecards[actor]["logistical_budget"]))
+            print("Team size:          " + str(scorecards[entry]["team_size"]))
+            print("Resource cost:      " + str(scorecards[entry]["resource_cost"]))
+            print("Time cost:          " + str(scorecards[entry]["time_cost"]))
+            print("Logistical budget:  " + str(scorecards[entry]["logistical_budget"]))
             print("")
 
-    # Generate a chart for each threat actor
+    # Generate a chart for each entry
     #
-    if not threat_actors:
-        print("No threat actors")
+    if not entries:
+        print("No entries found")
     else:
-        height = len(threat_actors)
+        height = len(entries)
 
-        for actor in threat_actors:
-            filename = "scorecards/scorecard-" + actor
+        for entry in entries:
+            filename = directory + "/scorecard-" + entry
             with open(filename + ".plt", "w") as outfile:
                 # Set the size of the output image (though note that it will be rotated)
                 outfile.write("set terminal png size 720, 1280\n")
@@ -202,7 +233,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
 
                 # Add a title to the scorecard
                 #
-                title = "Logistical budget for threat actor " + actor
+                title = "Logistical budget for " + entry_description + " " + entry
                 if start_date != epoch:
                     title += " starting at " + start_date.strftime("%Y-%m-%d")
                 if end_date != epoch:
@@ -213,8 +244,8 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                 #
                 outfile.write("set palette defined (")
                 offset = 0.0
-                numleft = len(scorecards[actor])
-                for score in scorecards[actor]:
+                numleft = len(scorecards[entry])
+                for score in scorecards[entry]:
                     score_palette_offset[score] = offset
                     outfile.write(str(offset) + " \"grey\", ")
                     outfile.write(str(offset + (1.0 - 2.0 * score_fuzz[score])) + " \"grey\", ")
@@ -231,7 +262,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
 
                 # Now write out the data
                 #
-                for score in scorecards[actor]:
+                for score in scorecards[entry]:
                     # Specify the Y-axis parameters
                     #
                     outfile.write("set ylabel \"" + score_units[score] + "\" offset 3, 0\n")
@@ -248,7 +279,7 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                     # Output the scaled score
                     #
                     outfile.write("$" + score + " << EOD\n")
-                    val = scorecards[actor][score]
+                    val = scorecards[entry][score]
                     if score_type[score] == "linear":
                         pass
                     elif score_type[score] == "log":

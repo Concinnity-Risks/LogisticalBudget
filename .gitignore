@@ -5,4 +5,5 @@ settings.py
 .hg
 .hgignore
 heatmaps/
-scorecards/
+scorecards-actors/
+scorecards-ransomware/

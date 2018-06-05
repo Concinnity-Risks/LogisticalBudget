@@ -116,11 +116,15 @@ if __name__ == "__main__":
         sys.exit("No events returned")
 
     if args.scorecards:
-        # Produce a score table against various criteria for each threat actor
+        # Produce a score table against various criteria for each threat actor and for each ransomware
         #
-        if not os.path.exists("scorecards"):
-            os.makedirs("scorecards")
-        scorecards.generate_threat_actor_scorecards(misp_data, args.start_date, args.end_date)
+        if not os.path.exists("scorecards-actors"):
+            os.makedirs("scorecards-actors")
+        scorecards.generate_threat_actor_scorecards(misp_data, "scorecards-actors",  args.start_date, args.end_date)
+
+        if not os.path.exists("scorecards-ransomware"):
+            os.makedirs("scorecards-ransomware")
+        scorecards.generate_ransomware_scorecards(misp_data, "scorecards-ransomware",  args.start_date, args.end_date)
 
     elif args.analyse:
         # Perform some basic analysis on the MISP data, which can be useful
