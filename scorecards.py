@@ -48,12 +48,11 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
         "logistical_budget": "Logistical Budget"
     };
 
-    # TODO: Work out why multiplots with multiple palettes only use the first palette
     score_colour = {
-        "team_size": "red",
-        "resource_cost": "orange",
+        "team_size": "orange",
+        "resource_cost": "red",
         "time_cost": "blue",
-        "logistical_budget": "purple"
+        "logistical_budget": "black"
     };
 
     score_units = {
@@ -86,6 +85,16 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
         "time_cost": 0.1,
         "logistical_budget": 50.0
     };
+
+    score_fuzz = {
+        "team_size": 0.25,
+        "resource_cost": 0.25,
+        "time_cost": 0.25,
+        "logistical_budget": 0.05
+    };
+
+    # This will be filled in later, when the palette is constructed
+    score_palette_offset = {}
 
     # Generate an initial collection of score cards
     #
@@ -200,6 +209,26 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                     title += " ending at " + end_date.strftime("%Y-%m-%d")
                 outfile.write("set label 1 \"" + title + "\" offset -7, 0 rotate by 90\n")
 
+                # Set the palette for all scores: Gnuplot allows a single palette even in multiplots
+                #
+                outfile.write("set palette defined (")
+                offset = 0.0
+                numleft = len(scorecards[actor])
+                for score in scorecards[actor]:
+                    score_palette_offset[score] = offset
+                    outfile.write(str(offset) + " \"grey\", ")
+                    outfile.write(str(offset + (1.0 - 2.0 * score_fuzz[score])) + " \"grey\", ")
+                    outfile.write(str(offset + (1.0 - score_fuzz[score])) + " \"" + score_colour[score] + "\", ")
+                    outfile.write(str(offset + 1.0) + " \"white\"")
+                    offset += 1.0
+                    numleft -= 1
+                    if numleft != 0:
+                        outfile.write(", ")
+
+                outfile.write(")\n")
+                score_palette_max = offset
+                outfile.write("set cbrange [ 0.0 : " + str(score_palette_max) + "]\n")
+
                 # Now write out the data
                 #
                 for score in scorecards[actor]:
@@ -211,13 +240,6 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                         outfile.write("set format y \"%1.1f\"\n")
                     else:
                         outfile.write("set format y \"%6.0f\"\n")
-
-                    # Set the palette for this score
-                    #
-                    outfile.write("set palette defined (0.0 \"grey\", " +
-                        str(score_range[score] * 0.5) + " \"grey\", " +
-                        str(score_range[score] * 0.75) + " \"" + score_colour[score] + "\", " +
-                        str(score_range[score]) + " \"white\")\n")
 
                     # Set the score description label
                     # TODO: Work out why rotate does not work in this case
@@ -235,13 +257,13 @@ def generate_threat_actor_scorecards(misp_data, start_date, end_date):
                     else:
                         raise RuntimeError("Unexpected score_type")
                     val = val * score_multiplier[score]
-                    outfile.write("1 " + str(val / 0.75) + "\n")
+                    outfile.write("1 " + str(val / (1.0 - score_fuzz[score])) + "\n")
                     outfile.write("EOD\n")
 
                     # End the data, and plot
                     #
-                    outfile.write("plot for [i=1000:1:-1] \"$" + score + "\" using 1:(($2/1000)*i):(($2/1000)*i) " +
-                        "notitle with boxes fillcolor palette\n")
+                    outfile.write("plot for [i=255:1:-1] \"$" + score + "\" using 1:(($2/256.0)*i):" +
+                        "(" + str(score_palette_offset[score]) + "+(i/256.0)) notitle with boxes fillcolor palette\n")
 
                     outfile.write("unset label 1\n")
 
