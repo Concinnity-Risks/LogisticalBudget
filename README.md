@@ -13,9 +13,13 @@ Install Python packages:
     pip3 install --user setuptools wheel
     pip3 install --user tqdm plotly pymisp
 
-Install additional packages, for example on Fedora:
+Install additional packages, for example on Red Hat based systems:
 
     sudo dnf install gnuplot ImageMagick
+
+Alternatively, on Debian based systems:
+
+    sudo apt-get install gnuplot graphicsmagick
 
 # Building and running
 
