@@ -120,10 +120,12 @@ if __name__ == "__main__":
         #
         if not os.path.exists("scorecards-actors"):
             os.makedirs("scorecards-actors")
+        print("Generating Threat Actor scorecards")
         scorecards.generate_threat_actor_scorecards(misp_data, "scorecards-actors",  args.start_date, args.end_date)
 
         if not os.path.exists("scorecards-ransomware"):
             os.makedirs("scorecards-ransomware")
+        print("Generating Ransomware scorecards")
         scorecards.generate_ransomware_scorecards(misp_data, "scorecards-ransomware",  args.start_date, args.end_date)
 
     elif args.analyse:
@@ -144,7 +146,10 @@ if __name__ == "__main__":
         if not os.path.exists("heatmaps"):
             os.makedirs("heatmaps")
         if args.num_days != 0 and args.bin_size != 0:
+            print("Generating custom heatmaps")
             heatmaps.generate_heatmaps(misp_data, num_days = args.num_days, bin_size = args.bin_size, bin_name = "custom")
         else:
+            print("Generating monthly heatmaps")
             heatmaps.generate_heatmaps(misp_data, num_days = 15 * 30, bin_size = 30, bin_name = "monthly")
+            print("Generating weekly heatmaps")
             heatmaps.generate_heatmaps(misp_data, num_days = 3 * 30, bin_size = 7, bin_name = "weekly")

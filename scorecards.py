@@ -73,9 +73,9 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
     # Set up the score characteristics
     #
     score_descriptions = {
-        "team_size": "Team Size",
-        "resource_cost": "Resource Cost",
-        "time_cost": "Time Cost",
+        "team_size": "Estimated Organisation Size",
+        "resource_cost": "Estimated Infrastructure Spend",
+        "time_cost": "Estimated Time Investment",
         "logistical_budget": "Logistical Budget"
     };
 
@@ -140,7 +140,7 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
 
     # Scan the events by entry and timestamp
     #
-    for event in tqdm(events):
+    for event in events:
         event_id = int(event["id"])
         if event_id in attributes:
             event_attributes = attributes[event_id]
@@ -194,7 +194,7 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
     else:
         height = len(entries)
 
-        for entry in entries:
+        for entry in tqdm(entries):
             filename = directory + "/scorecard-" + entry
             with open(filename + ".plt", "w") as outfile:
                 # Set the size of the output image (though note that it will be rotated)
@@ -210,10 +210,10 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
 
                 # Set the bottom (left after rotation) margin so that score names are not truncated
                 #
-                outfile.write("set bmargin 10\n")
+                outfile.write("set bmargin 15\n")
                 outfile.write("set tmargin 5\n")
-                outfile.write("set lmargin 8\n")
-                outfile.write("set rmargin 5\n")
+                outfile.write("set lmargin 7\n")
+                outfile.write("set rmargin 3\n")
 
                 # Produce multiple graphs side-by-side
                 outfile.write("set multiplot layout 1, " + str(len(score_descriptions)) + "\n")
@@ -221,15 +221,11 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
                 # Set the graph style
                 outfile.write("set style fill solid noborder\n")
 
-                # Rotate the labels so that they are the expected rotation when the output is rotated
-                #
-                outfile.write("unset xtics\n")
-                outfile.write("set ytics right rotate by 90\n")
-
                 # Specify the X-axis parameters
                 #
                 outfile.write("set xrange [ 0.0 : 2.0 ]\n")
                 outfile.write("set boxwidth 1.0\n")
+                outfile.write("unset xtics\n")
 
                 # Add a title to the scorecard
                 #
@@ -238,7 +234,7 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
                     title += " starting at " + start_date.strftime("%Y-%m-%d")
                 if end_date != epoch:
                     title += " ending at " + end_date.strftime("%Y-%m-%d")
-                outfile.write("set label 1 \"" + title + "\" offset -7, 0 rotate by 90\n")
+                outfile.write("set label 1 \"" + title + "\" offset -3, 10 rotate by 90\n")
 
                 # Set the palette for all scores: Gnuplot allows a single palette even in multiplots
                 #
@@ -265,16 +261,17 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
                 for score in scorecards[entry]:
                     # Specify the Y-axis parameters
                     #
-                    outfile.write("set ylabel \"" + score_units[score] + "\" offset 3, 0\n")
                     outfile.write("set yrange [ 0.0 : " + str(score_range[score]) + " ]\n")
                     if score_range[score] < 5.0:
                         outfile.write("set format y \"%1.1f\"\n")
                     else:
                         outfile.write("set format y \"%6.0f\"\n")
 
+                    outfile.write("set ytics " + str(score_range[score] / 10.0) + "\n")
+                    outfile.write("set format y ''\n")
+
                     # Set the score description label
-                    # TODO: Work out why rotate does not work in this case
-                    outfile.write("set xlabel \"" + score_descriptions[score] + "\" offset 0, -2 rotate by 90\n")
+                    outfile.write("set xlabel \"" + score_descriptions[score] + "\" right rotate by 90\n")
 
                     # Output the scaled score
                     #

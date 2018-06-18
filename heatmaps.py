@@ -91,7 +91,7 @@ def generate_heatmaps(misp_data, num_days, bin_size, bin_name):
              "use_plotly": html
              })
 
-    for set in sets:
+    for set in tqdm(sets):
         generate_by_threat_actor(misp_data, **set)
 
 
@@ -112,7 +112,6 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
     attributes = misp_data["attributes"]
 
     title = scoring_name + " per " + str(bin_size) + " day period"
-    print("Generating " + ("HTML" if use_plotly else "PNG") + " for " + title)
 
     time_base = datetime.datetime.today()
     unattributed = "Unattributed"
@@ -130,7 +129,7 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
 
     # Scan the events by actor and timestamp
     #
-    for event in tqdm(events):
+    for event in events:
         event_id = int(event["id"])
         if event_id in attributes:
             event_attributes = attributes[event_id]
