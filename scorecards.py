@@ -127,6 +127,12 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
     # This will be filled in later, when the palette is constructed
     score_palette_offset = {}
 
+    # Initialise our accumulators for the number of events relevant to each entry
+    #
+    num_events = {}
+    for entry in entries:
+        num_events[entry] = 0
+
     # Generate an initial collection of score cards
     #
     scorecards = {}
@@ -174,6 +180,7 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
                         scorecards[event_entry]["resource_cost"] += scoring.score_resource_cost(event, event_attributes)
                         scorecards[event_entry]["time_cost"] += scoring.score_time_cost(event, event_attributes)
                         scorecards[event_entry]["logistical_budget"] += scoring.score_logistical_budget(event, event_attributes)
+                        num_events[event_entry] += 1
 
     # Now generate our score card as a sumple text output for now
     #
@@ -321,3 +328,7 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
 
             # Remove the temporary output
             os.remove(filename + ".tmp.png");
+
+        print("\n\nNumber of events by entity:\n")
+        for entry in entries:
+            print(entry + ": " + str(num_events[entry]))
