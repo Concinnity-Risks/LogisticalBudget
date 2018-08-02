@@ -18,7 +18,7 @@ For Ransomware, can we estimate how much development time is involved, or how ma
 
 ![APT specific scorecard for Wannacry](https://github.com/Concinnity-Risks/LogisticalBudget/blob/master/scorecard-WannaCry.png)
 
-These estimates are not likely to accurate, but they do allow analysis of attributed events in your MISP instance, which can be remarkably useful for some kinds of strategic work.
+These estimates are not likely to be accurate in any absolute value sense, but they do allow analysis of attributed events in your MISP instance, which can be remarkably useful for some kinds of strategic work. For example, budgeting defenses or increased RE time against certain APTs.
 
 # Dependencies
 
