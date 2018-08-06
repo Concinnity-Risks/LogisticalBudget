@@ -41,3 +41,9 @@ Copy settings.default.py to settings.py and edit it for the MISP server
 and API key you are using.  Then run, for example:
 
     python3 generate.py
+
+# Collaboration
+
+LogisticalBudget is a collaborative effort between Concinnity Risks and Periapt Systems.
+
+![Periapt Systems logo](https://github.com/Concinnity-Risks/LogisticalBudget/blob/master/periapt-systems-logo-small.png)
