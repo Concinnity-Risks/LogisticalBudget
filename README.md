@@ -35,6 +35,21 @@ Alternatively, on Debian based systems:
 
     sudo apt-get install gnuplot graphicsmagick
 
+## For Mac OS users
+
+Install Python packages:
+1.  ``` $ pip3 install --user setuptools wheel ```
+2.  ``` $ pip3 install --user tqdm plotly pymisp ```
+
+It might be necessary to update the PATH variables in your bash profile. 
+
+To install the additional packages install Homebrew if you do not already have it: https://brew.sh/ then run the following commands in Terminal.
+
+1.  ``` $ brew install gnuplot ```
+2.  ``` $ brew install imagemagick ```
+3.  ``` $ brew install graphicsmagick ```
+
+
 # Building and running
 
 Copy settings.default.py to settings.py and edit it for the MISP server
