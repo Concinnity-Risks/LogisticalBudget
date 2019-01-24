@@ -212,7 +212,7 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
                             auto_open=False, show_link=False)
     else:
         if not threat_actors:
-            print("No threat actors")
+            print("Info: No threat actors found for heatmap '" + title + "'")
         else:
             height = len(sorted_threat_actors)
             width = len(sorted_rows[0])
