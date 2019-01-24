@@ -61,8 +61,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="With no arguments, the cached data will be used to generate " +
         "heatmaps showing threat actors against time, scored by various criteria.")
 
-    parser.add_argument("--nocache", dest="use_cache", action="store_const", const=False, default=True,
-         help="Avoid reading or writing information from or to the cache and query the MISP server directly (which can be slow)")
+    parser.add_argument("--forcedownload", dest="force_download", action="store_const", const=True, default=False,
+         help="Force download of all MISP data from the server rather than using the cache (this can be slow)")
 
     parser.add_argument("--dumpcache", dest="dump_cache", action="store_const", const=True, default=False,
          help="Load the contents of the cache.obj file and pretty-print it to a text file named cache.txt")
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     # Obtain the event data, either from the local cache or from the MISP server
     #
-    misp_data = misp.get_misp_data(misp_server, args.use_cache)
+    misp_data = misp.get_misp_data(misp_server, args.force_download)
     total = len(misp_data["events"])
     if total == 0:
         sys.exit("No events returned")

@@ -41,7 +41,7 @@ Install Python packages:
 1.  ``` $ pip3 install --user setuptools wheel ```
 2.  ``` $ pip3 install --user tqdm plotly pymisp ```
 
-It might be necessary to update the PATH variables in your bash profile. 
+It might be necessary to update the PATH variables in your bash profile.
 
 To install the additional packages install Homebrew if you do not already have it: https://brew.sh/ then run the following commands in Terminal.
 
@@ -56,6 +56,19 @@ Copy settings.default.py to settings.py and edit it for the MISP server
 and API key you are using.  Then run, for example:
 
     python3 generate.py
+
+# Caching of MISP data
+
+The MISP data is cached locally because it can take upwards of an hour to
+fetch all of the attribute data from the MISP server.
+
+The MISP event data will always be downloaded from the MISP server as this is
+a relatively quick operation.
+
+By default, attribute data associated with an event will only be downloaded
+from the server where the event data just downloaded differs from the event
+data in the cache.  To force a full download of all attribute data, use the
+``` --forcedownload ``` command-line option.
 
 # Collaboration
 

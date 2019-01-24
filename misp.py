@@ -44,12 +44,12 @@ def search(misp, **kwargs):
     return res
 
 
-def get_misp_data(misp, use_cache):
+def get_misp_data(misp, force_download):
     """
-    Query events and attributes from the server, but if requested use the cache where possible
+    Query events and attributes from the server, using cached data where available
 
     misp: The MISP server connection object
-    use_cache: True if the data from the cache should be uses in preference
+    force_download: Force download of all attributes from the server (this can be slow)
     """
 
     misp_data = {
@@ -57,73 +57,51 @@ def get_misp_data(misp, use_cache):
         "attributes": {},
     }
 
-    if use_cache:
-        try:
-            # Try reading from the cache first
-            misp_data = caching.read_cache()
-        except FileNotFoundError:
-            print("Cache data file not found")
-            pass
+    try:
+        # Try reading from the cache first
+        misp_data = caching.read_cache()
+    except FileNotFoundError:
+        print("Cache data file not found")
+        pass
 
     warnings = []
 
     # Obtain the data from the MISP server
     #
-    try:
-        # Get events
-        #
-        print("Obtaining events from " + ("cache" if caching else "server"))
-        events = misp_data["events"]
-        if not use_cache or len(misp_data["events"]) == 0:
-            r = misp.get_index(filters=None)
-            if r.get('errors'):
-                print("Warning: Errors from get_index() call")
-                print(r["errors"])
-            events = r["response"]
+    print("Obtaining events...")
+    cached_events = misp_data["events"]
+    r = misp.get_index(filters=None)
+    if r.get('errors'):
+        print("Warning: Errors from get_index() call")
+        print(r["errors"])
+    updated_events = r["response"]
 
-        # Get attributes associated with each event
-        #
-        print("Obtaining attributes from " + ("cache (and maybe the server)" if caching else "server"))
-        attributes = misp_data["attributes"]
-        try:
-            for event in tqdm(events):
-                event_id_str = event["id"]
-                event_id = int(event_id_str)
-                if not event_id in attributes:
-                    kwargs = {"controller": "attributes",
-                              "eventid": event_id_str}
-                    attrs = search(misp=misp, **kwargs)
+    # Get attributes associated with each event
+    #
+    print("Obtaining attributes...")
+    updated_attributes = misp_data["attributes"]
+    for event in tqdm(updated_events):
+        if force_download or cached_events == {} or not event in cached_events:
+            event_id_str = event["id"]
+            event_id = int(event_id_str)
+            if not event_id in updated_attributes:
+                kwargs = {"controller": "attributes",
+                          "eventid": event_id_str}
+                attrs = search(misp=misp, **kwargs)
 
-                    if "Attribute" in attrs:
-                        attributes[event_id] = attrs["Attribute"]
-                    else:
-                        warnings.append("Warning: Attributes for event " + event_id_str +
-                                        " were in unexpected format " + str(attrs))
-                        attributes[event_id] = attrs
+                if "Attribute" in attrs:
+                    updated_attributes[event_id] = attrs["Attribute"]
+                else:
+                    warnings.append("Warning: Attributes for event " + event_id_str +
+                                    " were in unexpected format " + str(attrs))
+                    updated_attributes[event_id] = attrs
 
-        except KeyboardInterrupt:
-            # Sometimes the user get bored, in which case stop obtaining
-            # attributes, but otherwise continue
-            print("\nStopped retrieving attribute data due to keyboard interrupt")
+    misp_data = {
+        "events": updated_events,
+        "attributes": updated_attributes,
+    }
 
-        misp_data = {
-            "events": events,
-            "attributes": attributes,
-        }
-
-        if use_cache:
-            caching.write_cache(misp_data)
-
-    except Exception as e:
-        print(repr(e))
-
-        misp_data = {
-            "events": events,
-            "attributes": attributes,
-        }
-
-        if use_cache:
-            caching.write_cache(misp_data)
+    caching.write_cache(misp_data)
 
     # Emit collected warnings
     #
