@@ -58,6 +58,7 @@ def get_misp_data(misp, cache_filename, force_download):
         "attributes": {},
     }
 
+    print("Reading cache...")
     try:
         # Try reading from the cache first
         misp_data = caching.read_cache(cache_filename)
@@ -102,6 +103,7 @@ def get_misp_data(misp, cache_filename, force_download):
         "attributes": updated_attributes,
     }
 
+    print("Writing cache...")
     caching.write_cache(cache_filename, misp_data)
 
     # Emit collected warnings
