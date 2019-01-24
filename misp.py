@@ -44,11 +44,12 @@ def search(misp, **kwargs):
     return res
 
 
-def get_misp_data(misp, force_download):
+def get_misp_data(misp, cache_filename, force_download):
     """
     Query events and attributes from the server, using cached data where available
 
     misp: The MISP server connection object
+    cache_filename: The name of the file containing the cache
     force_download: Force download of all attributes from the server (this can be slow)
     """
 
@@ -59,7 +60,7 @@ def get_misp_data(misp, force_download):
 
     try:
         # Try reading from the cache first
-        misp_data = caching.read_cache()
+        misp_data = caching.read_cache(cache_filename)
     except FileNotFoundError:
         print("Cache data file not found")
         pass
@@ -101,7 +102,7 @@ def get_misp_data(misp, force_download):
         "attributes": updated_attributes,
     }
 
-    caching.write_cache(misp_data)
+    caching.write_cache(cache_filename, misp_data)
 
     # Emit collected warnings
     #

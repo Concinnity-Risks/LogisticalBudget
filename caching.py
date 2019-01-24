@@ -21,25 +21,25 @@ import pprint
 from tqdm import tqdm
 
 
-def write_cache(events):
-    with open("cache.obj", "wb") as outfile:
+def write_cache(cache_filename, events):
+    with open(cache_filename, "wb") as outfile:
         pickle.dump(events, outfile)
 
 
-def read_cache():
-    with open("cache.obj", "rb") as infile:
+def read_cache(cache_filename):
+    with open(cache_filename, "rb") as infile:
         events = pickle.load(infile)
     return events
 
 
-def dump_cache():
+def dump_cache(cache_filename, dump_filename):
     try:
-        misp_data = read_cache()
+        misp_data = read_cache(cache_filename)
     except FileNotFoundError:
         raise ValueError("No cache file found")
 
     errors = []
-    with open("cache.txt", "w") as outfile:
+    with open(dump_filename, "w") as outfile:
         pp = pprint.PrettyPrinter(indent=4, stream=outfile)
 
         for event in tqdm(misp_data["events"]):
