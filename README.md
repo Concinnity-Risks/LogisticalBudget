@@ -59,7 +59,7 @@ and API key you are using.  Then run, for example:
 
 # Collaboration
 
-LogisticalBudget is a collaborative effort between Concinnity Risks and Periapt Systems.
+LogisticalBudget is a collaborative effort between Concinnity Risks, Periapt Systems and xQ Enterprises Ltd.
 
 ![Periapt Systems logo](https://github.com/Concinnity-Risks/LogisticalBudget/blob/master/periapt-systems-logo-small.png)
 
