@@ -41,7 +41,7 @@ Install Python packages:
 1.  ``` $ pip3 install --user setuptools wheel ```
 2.  ``` $ pip3 install --user tqdm plotly pymisp ```
 
-It might be necessary to update the PATH variables in your bash profile. 
+It might be necessary to update the PATH variables in your bash profile.
 
 To install the additional packages install Homebrew if you do not already have it: https://brew.sh/ then run the following commands in Terminal.
 
@@ -62,3 +62,5 @@ and API key you are using.  Then run, for example:
 LogisticalBudget is a collaborative effort between Concinnity Risks and Periapt Systems.
 
 ![Periapt Systems logo](https://github.com/Concinnity-Risks/LogisticalBudget/blob/master/periapt-systems-logo-small.png)
+
+![xQ Enterprises Ltd logo](https://github.com/Concinnity-Risks/LogisticalBudget/blob/master/xQ-logo.png)
