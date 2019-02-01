@@ -63,4 +63,4 @@ LogisticalBudget is a collaborative effort between Concinnity Risks and Periapt 
 
 ![Periapt Systems logo](https://github.com/Concinnity-Risks/LogisticalBudget/blob/master/periapt-systems-logo-small.png)
 
-![xQ Enterprises Ltd logo](https://github.com/Concinnity-Risks/LogisticalBudget/blob/master/xQ-logo.png)
+![xQ Enterprises Ltd logo](https://github.com/Concinnity-Risks/LogisticalBudget/blob/master/xQ-logo.png =220x166)
