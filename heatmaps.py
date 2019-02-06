@@ -113,10 +113,20 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
 
     title = scoring_name + " per " + str(bin_size) + " day period"
 
-    time_base = datetime.datetime.today()
-    unattributed = "Unattributed"
+    # Find the latest event in the data
+    #
+    time_base = datetime.datetime.utcfromtimestamp(0)
+    for event in tqdm(events):
+        if "timestamp" in event:
+            seconds_since_epoch = int(event["timestamp"])
+            if seconds_since_epoch > 1:
+                event_time = datetime.datetime.fromtimestamp(seconds_since_epoch)
+                if event_time > time_base:
+                    time_base = event_time
 
     # Generate dictionary of threat actors
+    #
+    unattributed = "Unattributed"
     threat_actors = utility.identify_threat_actors(misp_data, initial={unattributed: True})
 
     # Construct an initial table of actors and number of events by day
