@@ -116,7 +116,7 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
     # Find the latest event in the data
     #
     time_base = datetime.datetime.utcfromtimestamp(0)
-    for event in tqdm(events):
+    for event in events:
         if "timestamp" in event:
             seconds_since_epoch = int(event["timestamp"])
             if seconds_since_epoch > 1:
@@ -146,14 +146,8 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
         else:
             event_attributes = []
 
-        event_actor = unattributed
-
-        if "GalaxyCluster" in event:
-            galaxycluster = event["GalaxyCluster"]
-            for galaxy in galaxycluster:
-                if "Galaxy" in galaxy:
-                    if galaxy["type"] == "threat-actor":
-                        event_actor = galaxy["value"]
+        # Identify the threat actor in the event
+        event_actor = utility.identify_entry("threat-actor", event)
 
         if "timestamp" in event:
             seconds_since_epoch = int(event["timestamp"])

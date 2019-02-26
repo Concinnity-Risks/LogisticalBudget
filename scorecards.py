@@ -150,17 +150,10 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
         else:
             event_attributes = []
 
-        unattributed = "Unattributed"
-        event_entry = unattributed
+        # Identify the entry in the event
+        event_entry = utility.identify_entry(galaxy_type, event)
 
-        if "GalaxyCluster" in event:
-            galaxycluster = event["GalaxyCluster"]
-            for galaxy in galaxycluster:
-                if "Galaxy" in galaxy:
-                    if galaxy["type"] == galaxy_type:
-                        event_entry = galaxy["value"]
-
-        if event_entry != unattributed:
+        if event_entry != "Unattributed":
             if "timestamp" in event:
                 seconds_since_epoch = int(event["timestamp"])
                 if seconds_since_epoch > 1:

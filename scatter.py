@@ -57,7 +57,7 @@ def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date
 
 def bin_ipv4_first_octet(event, attribute):
     """
-    Returns the first octet of an associated IPv4 address, or -1 if no IPv4 was found
+    Returns: The first octet of an associated IPv4 address, or -1 if no IPv4 was found
     """
 
     if attribute["category"] == "Network activity" or attribute["category"] == "Payload delivery":
@@ -123,16 +123,7 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
             event_id = int(event["id"])
 
             # Identify the entry in the event
-            #
-            unattributed = "Unattributed"
-            event_entry = unattributed
-
-            if "GalaxyCluster" in event:
-                galaxycluster = event["GalaxyCluster"]
-                for galaxy in galaxycluster:
-                    if "Galaxy" in galaxy:
-                        if galaxy["type"] == galaxy_type:
-                            event_entry = galaxy["value"]
+            event_entry = utility.identify_entry(galaxy_type, event)
 
             # If the event relates to the entry we are currently graphing, then collate the event's data
             #
