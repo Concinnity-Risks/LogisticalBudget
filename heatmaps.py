@@ -102,7 +102,7 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
     misp_data - The events and attributes loaded from the MISP server
     num_days - The total number of days to generate the heat map for
     bin_size - The number of days to bin events into (e.g. 7 to put them into weekly bins)
-    scoring_function - Function to score the event
+    scoring_function - Function to score an event and its attributes
     scoring_name - A string to describe the scoring of the event
     filename - The name of the file to write the heatmap to
     use_plotly - True to use plotly for the rendering, False to output data for gnuplot
