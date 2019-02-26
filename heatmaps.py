@@ -129,7 +129,7 @@ def generate_by_threat_actor(misp_data, num_days, bin_size, scoring_function, sc
     unattributed = "Unattributed"
     threat_actors = utility.identify_threat_actors(misp_data, initial={unattributed: True})
 
-    # Construct an initial table of actors and number of events by day
+    # Construct an initial table of actors and zero scores
     #
     rows = {}
     for actor in threat_actors.keys():
