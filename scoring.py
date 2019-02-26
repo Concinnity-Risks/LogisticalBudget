@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
+# TODO: More representative scoring functions
+
+
 def score_by_event_count(event, attributes):
     """ Simple event counting score function """
     return 1

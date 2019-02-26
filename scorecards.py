@@ -17,9 +17,6 @@ import scoring
 import utility
 
 
-# TODO: More representative scoring functions
-
-
 def generate_threat_actor_scorecards(misp_data, directory, start_date, end_date):
     """
     Generate a score card for each threat actor
