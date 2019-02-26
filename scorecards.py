@@ -142,7 +142,7 @@ def generate_scorecards(misp_data, directory, galaxy_type, entry_description, st
             "resource_cost": 0,
             "time_cost": 0,
             "logistical_budget": 0
-        };
+        }
 
     # Scan the events by entry and timestamp
     #
