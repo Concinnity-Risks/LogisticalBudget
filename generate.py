@@ -32,6 +32,7 @@ import misp
 import analysis
 import heatmaps
 import scorecards
+import scatter
 import utility
 
 
@@ -51,7 +52,10 @@ if __name__ == "__main__":
     # Prepare a pretty printer for debug purposes
     pp = pprint.PrettyPrinter(indent=4)
 
-    # Configure access to the MISP server
+    # Configure access to the MISP server.
+    # Note that if the API key has not been configured, or has been incorrectly configured,
+    # then this will throw a warning that authentication has failed, even if the --avoidserver
+    # option has been specified so that just the cache is used.
     misp_server = PyMISP(url, key, ssl)
 
     # Process command-line arguments
@@ -83,6 +87,9 @@ if __name__ == "__main__":
          help="Set the number of days for each bin for heatmaps")
 
     parser.add_argument("--scorecards", dest="scorecards", action="store_const", const=True, default=False,
+         help="Show scoring for all threat actors")
+
+    parser.add_argument("--scatter", dest="scatter_plots", action="store_const", const=True, default=False,
          help="Show scoring for all threat actors")
 
     parser.add_argument("--startdate", metavar="DATE", dest="start_date", type=validate_date, default=epoch,
@@ -130,12 +137,25 @@ if __name__ == "__main__":
         if not os.path.exists("scorecards-actors"):
             os.makedirs("scorecards-actors")
         print("Generating Threat Actor scorecards")
-        scorecards.generate_threat_actor_scorecards(misp_data, "scorecards-actors",  args.start_date, args.end_date)
+        scorecards.generate_threat_actor_scorecards(misp_data, "scorecards-actors", args.start_date, args.end_date)
 
         if not os.path.exists("scorecards-ransomware"):
             os.makedirs("scorecards-ransomware")
         print("Generating Ransomware scorecards")
-        scorecards.generate_ransomware_scorecards(misp_data, "scorecards-ransomware",  args.start_date, args.end_date)
+        scorecards.generate_ransomware_scorecards(misp_data, "scorecards-ransomware", args.start_date, args.end_date)
+
+    if args.scatter_plots:
+        # Produce plot of activity of various threat actors over time
+        #
+        if not os.path.exists("scatter-plot-actors"):
+            os.makedirs("scatter-plot-actors")
+        print("Generating Threat Actor scatter plots")
+        scatter.generate_threat_actor_scatter_plots(misp_data, "scatter-plot-actors", args.start_date, args.end_date)
+
+        if not os.path.exists("scatter-plot-ransomware"):
+            os.makedirs("scatter-plot-ransomware")
+        print("Generating Ransomware scatter plots")
+        scatter.generate_ransomware_scatter_plots(misp_data, "scatter-plot-ransomware", args.start_date, args.end_date)
 
     elif args.analyse:
         # Perform some basic analysis on the MISP data, which can be useful

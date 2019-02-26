@@ -1,10 +1,12 @@
 __pycache__
+*.pyc
+settings.py
 cache.obj
 cache.txt
-settings.py
 .hg
 .hgignore
 heatmaps/
 scorecards-actors/
 scorecards-ransomware/
-*.pyc
+scatter-plot-actors/
+scatter-plot-ransomware/
