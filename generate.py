@@ -19,12 +19,6 @@ if "--local" in sys.argv:
     else:
         sys.path.insert(0, "~/keep/packages/git/PyMISP")
 
-# Access to MISP servers
-from pymisp import PyMISP
-
-# Private settings for access to the chosen MISP server
-from settings import url, key, ssl
-
 # Modules directly associated with this application
 #
 import caching
@@ -51,12 +45,6 @@ def validate_date(input_string):
 if __name__ == "__main__":
     # Prepare a pretty printer for debug purposes
     pp = pprint.PrettyPrinter(indent=4)
-
-    # Configure access to the MISP server.
-    # Note that if the API key has not been configured, or has been incorrectly configured,
-    # then this will throw a warning that authentication has failed, even if the --avoidserver
-    # option has been specified so that just the cache is used.
-    misp_server = PyMISP(url, key, ssl)
 
     # Process command-line arguments
     #
@@ -134,7 +122,7 @@ if __name__ == "__main__":
 
     # Obtain the event data, either from the local cache or from the MISP server
     #
-    misp_data = misp.get_misp_data(misp_server, args.cache_filename, args.force_download, args.avoid_server or args.dump_cache)
+    misp_data = misp.get_misp_data(args.cache_filename, args.force_download, args.avoid_server or args.dump_cache)
     total = len(misp_data["events"])
     if total == 0:
         sys.exit("No events returned")

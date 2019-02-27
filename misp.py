@@ -18,22 +18,28 @@
 
 import caching
 
+# Access to MISP servers
+from pymisp import PyMISP
+
 # For progress bars
 from tqdm import tqdm
 
+# Private settings for access to the chosen MISP server
+from settings import url, key, ssl
 
-def search(misp, **kwargs):
+
+def search(misp_server, **kwargs):
     """
     Search the MISP server and return records that match
 
-    misp: The MISP server connection object
+    misp_server: The MISP server connection object
     kwargs: The specification of the search (e.g. controller="attributes", org="CIRCL")
     """
 
     res = {}
 
     try:
-        r = misp.search(**kwargs)
+        r = misp_server.search(**kwargs)
         if r.get('errors'):
             print("Warning: Errors from get_all_attributes_txt() call")
             print(r["errors"])
@@ -44,11 +50,10 @@ def search(misp, **kwargs):
     return res
 
 
-def get_misp_data(misp, cache_filename, force_download, avoid_server):
+def get_misp_data(cache_filename, force_download, avoid_server):
     """
     Query events and attributes from the server, using cached data where available
 
-    misp: The MISP server connection object
     cache_filename: The name of the file containing the cache
     force_download: Force download of all attributes from the server (this can be slow)
     avoid_server: Read the MISP data from the cache and return it, ignoring the server
@@ -76,7 +81,8 @@ def get_misp_data(misp, cache_filename, force_download, avoid_server):
     #
     print("Obtaining events...")
     cached_events = misp_data["events"]
-    r = misp.get_index(filters=None)
+    misp_server = PyMISP(url, key, ssl)
+    r = misp_server.get_index(filters=None)
     if r.get("errors"):
         print("Warning: Errors from get_index() call")
         print(r["errors"])
