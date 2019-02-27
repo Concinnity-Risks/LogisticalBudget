@@ -39,14 +39,14 @@ def generate_threat_actor_scatter_plots(misp_data, directory, start_date, end_da
         os.makedirs("scatter-plot-actors")
     print("Generating Threat Actor scatter plots")
 
-    generate_scatter_plots(misp_data, directory, "threat-actor", "threat actor",
-                           lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
-                           "IPv4 source address first six bits",
-                           "Number of IPv4 source addresses",
-                           filter_by_entry, bin_ipv4_first_six_bits,
-                           lambda x, y : 1,
-                           lambda x, y : 10,
-                           0, 64, start_date, end_date)
+    generate_scatter_plots_by_entry(misp_data, directory, "threat-actor", "threat actor",
+                                    lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
+                                    "IPv4 source address first six bits",
+                                    "Number of IPv4 source addresses",
+                                    filter_by_entry, bin_ipv4_first_six_bits,
+                                    lambda x, y : 1,
+                                    lambda x, y : 10,
+                                    0, 64, start_date, end_date)
 
 
 def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date):
@@ -65,14 +65,14 @@ def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date
         os.makedirs("scatter-plot-ransomware")
     print("Generating Ransomware scatter plots")
 
-    generate_scatter_plots(misp_data, directory, "ransomware", "ransomware",
-                           lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
-                           "IPv4 source address first six bits",
-                           "Number of IPv4 source addresses",
-                           filter_by_entry, bin_ipv4_first_six_bits,
-                           lambda x, y : 1,
-                           lambda x, y : 10,
-                           0, 64, start_date, end_date)
+    generate_scatter_plots_by_entry(misp_data, directory, "ransomware", "ransomware",
+                                    lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
+                                    "IPv4 source address first six bits",
+                                    "Number of IPv4 source addresses",
+                                    filter_by_entry, bin_ipv4_first_six_bits,
+                                    lambda x, y : 1,
+                                    lambda x, y : 10,
+                                    0, 64, start_date, end_date)
 
 
 def filter_by_entry(galaxy_type, entry, event, attributes):
@@ -134,7 +134,7 @@ def bin_ipv4_first_octet(event, attribute):
     return -1
 
 
-def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
+def generate_scatter_plots_by_entry(misp_data, directory, galaxy_type, entry_description,
         plot_title_function, x_axis_title, y_axis_title,
         filter_function, bin_function, primary_score_function, secondary_score_function,
         min_bin, max_bin, start_date, end_date):
