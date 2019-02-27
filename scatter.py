@@ -69,21 +69,6 @@ def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date
                            filter_by_entry, bin_ipv4_first_six_bits, 0, 64, start_date, end_date)
 
 
-def filter_all(galaxy_type, entry, event, attributes):
-    """
-    A filter that passes through all events
-
-    galaxy_type - The galaxy type to filter on
-    entry - The specific threat actor or ransomware to filter on
-    event - The event to query
-    attributes - The attributes associated with the event to query
-
-    Returns: True if the event matches, and false otherwise
-    """
-
-    return True
-
-
 def filter_by_entry(galaxy_type, entry, event, attributes):
     """
     A filter that determines whether the event matches the specified threat actor or ransomware
