@@ -23,6 +23,34 @@ import scoring
 import utility
 
 
+def generate_general_scatter_plots(misp_data, directory, start_date, end_date):
+    """
+    Generate general scatter plots for the entire data
+
+    misp_data - The events and attributes loaded from the MISP server
+    directory - The name of the directory to store the output in
+    start_date - A datetime object with the earliest date of events to be used when scoring,
+        use the datetime epoch to ignore the date
+    end_date - A datetime object with the latest date of events to be used when scoring,
+        use the datetime epoch to ignore the date
+    """
+
+    print("Generating general scatter plots")
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    generate_general_scatter_plot(misp_data, directory + "/scatter-ipsource",
+                                  "IPv4 source addresses, binned by the first octet",
+                                  "IPv4 source address first octet",
+                                  "Number of IPv4 source addresses",
+                                  lambda x, y: True,
+                                  bin_ipv4_first_octet,
+                                  lambda x, y : 1,
+                                  lambda x, y : 0.1,
+                                  0, 256, start_date, end_date)
+
+
 def generate_threat_actor_scatter_plots(misp_data, directory, start_date, end_date):
     """
     Generate a scatter plot for each threat actor
@@ -35,9 +63,10 @@ def generate_threat_actor_scatter_plots(misp_data, directory, start_date, end_da
         use the datetime epoch to ignore the date
     """
 
+    print("Generating Threat Actor scatter plots")
+
     if not os.path.exists("scatter-plot-actors"):
         os.makedirs("scatter-plot-actors")
-    print("Generating Threat Actor scatter plots")
 
     generate_scatter_plots_by_entry(misp_data, directory, "threat-actor", "threat actor",
                                     lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
@@ -61,9 +90,10 @@ def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date
         use the datetime epoch to ignore the date
     """
 
+    print("Generating Ransomware scatter plots")
+
     if not os.path.exists("scatter-plot-ransomware"):
         os.makedirs("scatter-plot-ransomware")
-    print("Generating Ransomware scatter plots")
 
     generate_scatter_plots_by_entry(misp_data, directory, "ransomware", "ransomware",
                                     lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
@@ -134,12 +164,105 @@ def bin_ipv4_first_octet(event, attribute):
     return -1
 
 
+def generate_general_scatter_plot(misp_data, filename,
+        plot_title, x_axis_title, y_axis_title,
+        filter_function, bin_function, primary_score_function, secondary_score_function,
+        min_bin, max_bin, start_date, end_date):
+    """
+    Generate a scatter plot for each entry (e.g. threat actor or ransomware)
+
+    misp_data - The events and attributes loaded from the MISP server
+    filename - The name of the file to store the output in
+    plot_title_function - A function that takes an entry and generates a plot title for it
+    x_axis_title - The description of the x-axis
+    y_axis_title - The description of the y-axis
+    filter_function - The function that determines whether to inspect the event+attribute-set or not
+    bin_function - The function that identifies which bin to filter each event+attribute-set into
+    primary_score_function - The function that determines the y-coordinate of the splat
+    secondary_score_function - The function that determines the size of the splat
+    min_bin - The minimum bin value (the lhs of the x-axis)
+    max_bin - The maximum bin value (the rhs of the x-axis)
+    start_date - A datetime object with the earliest date of events to be used when scoring,
+        use the datetime epoch to ignore the date
+    end_date - A datetime object with the latest date of events to be used when scoring,
+        use the datetime epoch to ignore the date
+    """
+
+    events = misp_data["events"]
+    attributes = misp_data["attributes"]
+
+    epoch = datetime.datetime.utcfromtimestamp(0)
+
+    # Generate an initial collection of src-ip bins
+    #
+    score = []
+    size = []
+    for bin in range(min_bin, max_bin):
+        score.append(0)
+        size.append(0)
+
+    # Scan all of the events
+    #
+    for event in tqdm(events):
+        event_id = int(event["id"])
+
+        if event_id in attributes:
+            event_attributes = attributes[event_id]
+        else:
+            event_attributes = []
+
+        if filter_function(event, event_attributes):
+            if "timestamp" in event:
+                seconds_since_epoch = int(event["timestamp"])
+                if seconds_since_epoch > 1:
+                    event_time = datetime.datetime.fromtimestamp(
+                        seconds_since_epoch)
+
+                    reject = False
+                    if start_date != epoch and event_time < start_date:
+                        reject = True
+                    if end_date != epoch and event_time > end_date:
+                        reject = True
+
+                    if not reject:
+                        # The event fits out filters: update the score accordingly
+                        #
+                        for attribute in event_attributes:
+                            bin = bin_function(event, attribute)
+                            if bin != -1:
+                                score[bin] += primary_score_function(event, attribute)
+                                size[bin] += secondary_score_function(event, attribute)
+                                # size[bin] += 0.1
+
+    # Now plot the graph
+    #
+    trace = graph_objs.Scatter(
+        y=score,
+        mode='markers',
+        marker=dict(
+            size=size,
+            color=score,
+            colorscale='Viridis',
+            showscale=True
+        )
+    )
+    data = [trace]
+    layout = dict(
+        title=plot_title,
+        xaxis=dict(title=x_axis_title),
+        yaxis=dict(title=y_axis_title))
+    fig = dict(data=data, layout=layout)
+
+    plotly.offline.plot(fig, filename=filename + ".html",
+                        auto_open=False, show_link=False)
+
+
 def generate_scatter_plots_by_entry(misp_data, directory, galaxy_type, entry_description,
         plot_title_function, x_axis_title, y_axis_title,
         filter_function, bin_function, primary_score_function, secondary_score_function,
         min_bin, max_bin, start_date, end_date):
     """
-    Generate a score card for each entry (e.g. threat actor or ransomware)
+    Generate a scatter plot for each entry (e.g. threat actor or ransomware)
 
     misp_data - The events and attributes loaded from the MISP server
     directory - The name of the directory to store the output in

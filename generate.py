@@ -151,6 +151,7 @@ if __name__ == "__main__":
     if args.scatter_plots:
         # Produce plot of activity of various threat actors over time
         #
+        scatter.generate_general_scatter_plots(misp_data, "scatter-plot-general", args.start_date, args.end_date)
         scatter.generate_threat_actor_scatter_plots(misp_data, "scatter-plot-actors", args.start_date, args.end_date)
         scatter.generate_ransomware_scatter_plots(misp_data, "scatter-plot-ransomware", args.start_date, args.end_date)
 
