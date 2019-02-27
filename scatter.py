@@ -43,7 +43,10 @@ def generate_threat_actor_scatter_plots(misp_data, directory, start_date, end_da
                            lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
                            "IPv4 source address first six bits",
                            "Number of IPv4 source addresses",
-                           filter_by_entry, bin_ipv4_first_six_bits, 0, 64, start_date, end_date)
+                           filter_by_entry, bin_ipv4_first_six_bits,
+                           lambda x, y : 1,
+                           lambda x, y : 10,
+                           0, 64, start_date, end_date)
 
 
 def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date):
@@ -66,7 +69,10 @@ def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date
                            lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
                            "IPv4 source address first six bits",
                            "Number of IPv4 source addresses",
-                           filter_by_entry, bin_ipv4_first_six_bits, 0, 64, start_date, end_date)
+                           filter_by_entry, bin_ipv4_first_six_bits,
+                           lambda x, y : 1,
+                           lambda x, y : 10,
+                           0, 64, start_date, end_date)
 
 
 def filter_by_entry(galaxy_type, entry, event, attributes):
@@ -130,7 +136,8 @@ def bin_ipv4_first_octet(event, attribute):
 
 def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
         plot_title_function, x_axis_title, y_axis_title,
-        filter_function, bin_function, min_bin, max_bin, start_date, end_date):
+        filter_function, bin_function, primary_score_function, secondary_score_function,
+        min_bin, max_bin, start_date, end_date):
     """
     Generate a score card for each entry (e.g. threat actor or ransomware)
 
@@ -143,6 +150,8 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
     y_axis_title - The description of the y-axis
     filter_function - The function that determines whether to inspect the event+attribute-set or not
     bin_function - The function that identifies which bin to filter each event+attribute-set into
+    primary_score_function - The function that determines the y-coordinate of the splat
+    secondary_score_function - The function that determines the size of the splat
     min_bin - The minimum bin value (the lhs of the x-axis)
     max_bin - The maximum bin value (the rhs of the x-axis)
     start_date - A datetime object with the earliest date of events to be used when scoring,
@@ -168,8 +177,10 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
     # Generate an initial collection of src-ip bins
     #
     score = []
+    size = []
     for bin in range(min_bin, max_bin):
         score.append(0)
+        size.append(0)
 
     # Generate a graph for each entry
     #
@@ -207,13 +218,8 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
                             for attribute in event_attributes:
                                 bin = bin_function(event, attribute)
                                 if bin != -1:
-                                    score[bin] += 1
-
-        # Generate sizes, though the goal is to have a scoring function determine the size
-        #
-        sizes = []
-        for bin in range(min_bin, max_bin):
-            sizes.append(score[bin] * 10)
+                                    score[bin] += primary_score_function(event, attribute)
+                                    size[bin] += secondary_score_function(event, attribute)
 
         # Now plot the graph
         #
@@ -221,7 +227,7 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
             y=score,
             mode='markers',
             marker=dict(
-                size=sizes,
+                size=size,
                 color=score,
                 colorscale='Viridis',
                 showscale=True
