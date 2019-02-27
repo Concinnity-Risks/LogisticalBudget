@@ -224,13 +224,19 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
                                 if bin != -1:
                                     score[bin] += 1
 
+        # Generate sizes, though the goal is to have a scoring function determine the size
+        #
+        sizes = []
+        for bin in range(min_bin, max_bin):
+            sizes.append(score[bin] * 10)
+
         # Now plot the graph
         #
         trace = graph_objs.Scatter(
             y=score,
             mode='markers',
             marker=dict(
-                size=16,
+                size=sizes,
                 color=score,
                 colorscale='Hot',
                 showscale=True
