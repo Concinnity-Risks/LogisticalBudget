@@ -40,7 +40,10 @@ def generate_threat_actor_scatter_plots(misp_data, directory, start_date, end_da
     print("Generating Threat Actor scatter plots")
 
     generate_scatter_plots(misp_data, directory, "threat-actor", "threat actor",
-                           filter_by_entry, bin_ipv4_first_octet, start_date, end_date)
+                           lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
+                           "IPv4 source address first six bits",
+                           "Number of IPv4 source addresses",
+                           filter_by_entry, bin_ipv4_first_six_bits, 0, 64, start_date, end_date)
 
 
 def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date):
@@ -60,7 +63,10 @@ def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date
     print("Generating Ransomware scatter plots")
 
     generate_scatter_plots(misp_data, directory, "ransomware", "ransomware",
-                           filter_by_entry, bin_ipv4_first_octet, start_date, end_date)
+                           lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
+                           "IPv4 source address first six bits",
+                           "Number of IPv4 source addresses",
+                           filter_by_entry, bin_ipv4_first_six_bits, 0, 64, start_date, end_date)
 
 
 def filter_all(galaxy_type, entry, event, attributes):
@@ -99,6 +105,25 @@ def filter_by_entry(galaxy_type, entry, event, attributes):
     return False
 
 
+def bin_ipv4_first_six_bits(event, attribute):
+    """
+    Returns: The first octet of an associated IPv4 address, or -1 if no IPv4 was found
+    """
+
+    if attribute["category"] == "Network activity" or attribute["category"] == "Payload delivery":
+        ty = attribute["type"]
+        if ty == "ip-src":
+            addr = attribute["value"].split(".")
+            if len(addr) == 4:
+                addr_bin = attribute["value"].split(".")[0]
+                try:
+                    return int(addr_bin) >> 2
+                except ValueError:
+                    return -1
+
+    return -1
+
+
 def bin_ipv4_first_octet(event, attribute):
     """
     Returns: The first octet of an associated IPv4 address, or -1 if no IPv4 was found
@@ -118,8 +143,9 @@ def bin_ipv4_first_octet(event, attribute):
     return -1
 
 
-def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description, filter_function, bin_function,
-        start_date, end_date):
+def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
+        plot_title_function, x_axis_title, y_axis_title,
+        filter_function, bin_function, min_bin, max_bin, start_date, end_date):
     """
     Generate a score card for each entry (e.g. threat actor or ransomware)
 
@@ -127,8 +153,13 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
     directory - The name of the directory to store the output in
     galaxy_type - The type of the galaxy to look at
     entry_description - How we refer to the galaxy type in human-readable terms
+    plot_title_function - A function that takes an entry and generates a plot title for it
+    x_axis_title - The description of the x-axis
+    y_axis_title - The description of the y-axis
     filter_function - The function that determines whether to inspect the event+attribute-set or not
     bin_function - The function that identifies which bin to filter each event+attribute-set into
+    min_bin - The minimum bin value (the lhs of the x-axis)
+    max_bin - The maximum bin value (the rhs of the x-axis)
     start_date - A datetime object with the earliest date of events to be used when scoring,
         use the datetime epoch to ignore the date
     end_date - A datetime object with the latest date of events to be used when scoring,
@@ -152,7 +183,7 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
     # Generate an initial collection of src-ip bins
     #
     score = []
-    for bin in range(0, 256):
+    for bin in range(min_bin, max_bin):
         score.append(0)
 
     # Generate a graph for each entry
@@ -160,9 +191,6 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
     for entry in tqdm(entries):
         # Construct a filename for the output
         filename = directory + "/scatter-" + entry
-
-        # Construct a title for the graph
-        title = "IPv4 source addresses, binned by IPv4 first octet, used by " + entry
 
         # Scan all of the events
         #
@@ -210,9 +238,9 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
         )
         data = [trace]
         layout = dict(
-            title=title,
-            xaxis=dict(title="IPv4 address first octet"),
-            yaxis=dict(title="Number of IPv4 source addresses"))
+            title=plot_title_function(entry),
+            xaxis=dict(title=x_axis_title),
+            yaxis=dict(title=y_axis_title))
         fig = dict(data=data, layout=layout)
 
         plotly.offline.plot(fig, filename=filename + ".html",
