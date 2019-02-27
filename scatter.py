@@ -65,8 +65,8 @@ def generate_threat_actor_scatter_plots(misp_data, directory, start_date, end_da
 
     print("Generating Threat Actor scatter plots")
 
-    if not os.path.exists("scatter-plot-actors"):
-        os.makedirs("scatter-plot-actors")
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     generate_scatter_plots_by_entry(misp_data, directory, "threat-actor", "threat actor",
                                     lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
@@ -92,8 +92,8 @@ def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date
 
     print("Generating Ransomware scatter plots")
 
-    if not os.path.exists("scatter-plot-ransomware"):
-        os.makedirs("scatter-plot-ransomware")
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     generate_scatter_plots_by_entry(misp_data, directory, "ransomware", "ransomware",
                                     lambda entry : "IPv4 source addresses, binned by the first six bits, used by " + entry,
