@@ -238,7 +238,7 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
             marker=dict(
                 size=sizes,
                 color=score,
-                colorscale='Hot',
+                colorscale='Viridis',
                 showscale=True
             )
         )
