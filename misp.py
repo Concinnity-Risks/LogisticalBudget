@@ -77,10 +77,14 @@ def get_misp_data(misp, cache_filename, force_download, avoid_server):
     print("Obtaining events...")
     cached_events = misp_data["events"]
     r = misp.get_index(filters=None)
-    if r.get('errors'):
+    if r.get("errors"):
         print("Warning: Errors from get_index() call")
         print(r["errors"])
-    updated_events = r["response"]
+    try:
+        updated_events = r["response"]
+    except KeyError:
+        print("Failed to query the events from the server: Please check the API key in settings.py")
+        exit(0)
 
     # Get attributes associated with each event
     #
