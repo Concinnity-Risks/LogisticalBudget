@@ -65,6 +65,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="With no arguments, the cached data will be used to generate " +
         "heatmaps showing threat actors against time, scored by various criteria.")
 
+    # Cache/server control options
+    #
     parser.add_argument("--cachefile", metavar="FILENAME", dest="cache_filename", type=str, default="cache.obj",
          help="Set the name of the file that MISP data is cached to")
 
@@ -75,34 +77,46 @@ if __name__ == "__main__":
          help="Avoid accessing the server, and solely use MISP data from the local cache")
 
     parser.add_argument("--dumpcache", dest="dump_cache", action="store_const", const=True, default=False,
-         help="Load the contents of the cache and pretty-print it to a text file (named by default cache.txt)")
+         help="Load the contents of the cache and pretty-print it to a text file (named by default cache.txt).  " +
+            "Implies --avoidserver")
 
     parser.add_argument("--dumpfile", metavar="FILENAME", dest="dump_filename", type=str, default="cache.txt",
          help="Specify the name of the file to output a dump of the cache to")
 
+    # Options that help with analysis of available data
+    #
+    parser.add_argument("--listactors", dest="list_actors", action="store_const", const=True, default=False,
+         help="Produce list of the known threat actors in the data")
+
+    parser.add_argument("--analyse", dest="analyse", action="store_const", const=True, default=False,
+         help="Produce an analysis of structure of the MISP data")
+
+    # Options that select which outputs to generate
+    #
+    parser.add_argument("--heatmaps", dest="heatmaps", action="store_const", const=True, default=False,
+         help="Generate heatmaps")
+
+    parser.add_argument("--scorecards", dest="scorecards", action="store_const", const=True, default=False,
+         help="Generate score cards")
+
+    parser.add_argument("--scatter", dest="scatter_plots", action="store_const", const=True, default=False,
+         help="Generate scatter plots")
+
+    # Options that control how the heatmaps are generated
+    #
     parser.add_argument("--numdays", metavar="DAYS", dest="num_days", type=int, default="0",
          help="Set the number of days of history for heatmaps")
 
     parser.add_argument("--binsize", metavar="DAYS", dest="bin_size", type=int, default="0",
          help="Set the number of days for each bin for heatmaps")
 
-    parser.add_argument("--scorecards", dest="scorecards", action="store_const", const=True, default=False,
-         help="Show scoring for all threat actors")
-
-    parser.add_argument("--scatter", dest="scatter_plots", action="store_const", const=True, default=False,
-         help="Show scoring for all threat actors")
-
+    # Options that control how the scorecards are generated
+    #
     parser.add_argument("--startdate", metavar="DATE", dest="start_date", type=validate_date, default=epoch,
          help="Set the start date for threat actor scorecards, in the format YYYY-MM-DD")
 
     parser.add_argument("--enddate", metavar="DATE", dest="end_date", type=validate_date, default=epoch,
          help="Set the end date for threat actor scorecards, in the format YYYY-MM-DD")
-
-    parser.add_argument("--listactors", dest="list_actors", action="store_const", const=True, default=False,
-         help="Produce list of the known threat actors in the data")
-
-    parser.add_argument("--analyse", dest="analyse", action="store_const", const=True, default=False,
-         help="Produce an analysis of structure of the MISP data")
 
     # Parse command-line arguments and then perform some extra validation
     #
@@ -118,18 +132,28 @@ if __name__ == "__main__":
         print("left hand side of the graph is not misleading")
         sys.exit(1)
 
-    # If requested, pretty print the cache contents into a file
-    #
-    if args.dump_cache:
-        caching.dump_cache(args.cache_filename, args.dump_filename)
-        sys.exit(0)
-
     # Obtain the event data, either from the local cache or from the MISP server
     #
-    misp_data = misp.get_misp_data(misp_server, args.cache_filename, args.force_download, args.avoid_server)
+    misp_data = misp.get_misp_data(misp_server, args.cache_filename, args.force_download, args.avoid_server or args.dump_cache)
     total = len(misp_data["events"])
     if total == 0:
         sys.exit("No events returned")
+
+    if args.dump_cache:
+        # Pretty print the cache contents into a file
+        caching.dump_cache(args.cache_filename, args.dump_filename)
+
+    if args.analyse:
+        # Perform some basic analysis on the MISP data, which can be useful
+        # for learning what is present in the data
+        analysis.analyse(misp_data)
+
+    if args.list_actors:
+        # List the threat actors present in the data
+        #
+        threat_actors = utility.identify_threat_actors(misp_data, initial={})
+        for actor in threat_actors:
+            print(actor)
 
     if args.scorecards:
         # Produce a score table against various criteria for each threat actor and for each ransomware
@@ -157,19 +181,7 @@ if __name__ == "__main__":
         print("Generating Ransomware scatter plots")
         scatter.generate_ransomware_scatter_plots(misp_data, "scatter-plot-ransomware", args.start_date, args.end_date)
 
-    elif args.analyse:
-        # Perform some basic analysis on the MISP data, which can be useful
-        # for learning what is present in the data
-        analysis.analyse(misp_data)
-
-    elif args.list_actors:
-        # List the threat actors present in the data
-        #
-        threat_actors = utility.identify_threat_actors(misp_data, initial={})
-        for actor in threat_actors:
-            print(actor)
-
-    else:
+    if args.heatmaps:
         # Generate the desired heat maps
         #
         if not os.path.exists("heatmaps"):
