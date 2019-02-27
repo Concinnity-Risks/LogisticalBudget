@@ -39,8 +39,8 @@ def generate_threat_actor_scatter_plots(misp_data, directory, start_date, end_da
         os.makedirs("scatter-plot-actors")
     print("Generating Threat Actor scatter plots")
 
-    generate_scatter_plots(misp_data, directory, "threat-actor",
-                           "threat actor", start_date, end_date)
+    generate_scatter_plots(misp_data, directory, "threat-actor", "threat actor",
+                           filter_by_entry, bin_ipv4_first_octet, start_date, end_date)
 
 
 def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date):
@@ -59,8 +59,44 @@ def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date
         os.makedirs("scatter-plot-ransomware")
     print("Generating Ransomware scatter plots")
 
-    generate_scatter_plots(misp_data, directory, "ransomware",
-                           "ransomware", start_date, end_date)
+    generate_scatter_plots(misp_data, directory, "ransomware", "ransomware",
+                           filter_by_entry, bin_ipv4_first_octet, start_date, end_date)
+
+
+def filter_all(galaxy_type, entry, event, attributes):
+    """
+    A filter that passes through all events
+
+    galaxy_type - The galaxy type to filter on
+    entry - The specific threat actor or ransomware to filter on
+    event - The event to query
+    attributes - The attributes associated with the event to query
+
+    Returns: True if the event matches, and false otherwise
+    """
+
+    return True
+
+
+def filter_by_entry(galaxy_type, entry, event, attributes):
+    """
+    A filter that determines whether the event matches the specified threat actor or ransomware
+
+    galaxy_type - The galaxy type to filter on
+    entry - The specific threat actor or ransomware to filter on
+    event - The event to query
+    attributes - The attributes associated with the event to query
+
+    Returns: True if the event matches, and false otherwise
+    """
+
+    # Identify the entry in the event
+    event_entry = utility.identify_entry(galaxy_type, event)
+
+    if event_entry == entry:
+        return True
+
+    return False
 
 
 def bin_ipv4_first_octet(event, attribute):
@@ -82,7 +118,8 @@ def bin_ipv4_first_octet(event, attribute):
     return -1
 
 
-def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description, start_date, end_date):
+def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description, filter_function, bin_function,
+        start_date, end_date):
     """
     Generate a score card for each entry (e.g. threat actor or ransomware)
 
@@ -90,6 +127,8 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
     directory - The name of the directory to store the output in
     galaxy_type - The type of the galaxy to look at
     entry_description - How we refer to the galaxy type in human-readable terms
+    filter_function - The function that determines whether to inspect the event+attribute-set or not
+    bin_function - The function that identifies which bin to filter each event+attribute-set into
     start_date - A datetime object with the earliest date of events to be used when scoring,
         use the datetime epoch to ignore the date
     end_date - A datetime object with the latest date of events to be used when scoring,
@@ -130,17 +169,12 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
         for event in events:
             event_id = int(event["id"])
 
-            # Identify the entry in the event
-            event_entry = utility.identify_entry(galaxy_type, event)
+            if event_id in attributes:
+                event_attributes = attributes[event_id]
+            else:
+                event_attributes = []
 
-            # If the event relates to the entry we are currently graphing, then collate the event's data
-            #
-            if event_entry == entry:
-                if event_id in attributes:
-                    event_attributes = attributes[event_id]
-                else:
-                    event_attributes = []
-
+            if filter_function(galaxy_type, entry, event, event_attributes):
                 if "timestamp" in event:
                     seconds_since_epoch = int(event["timestamp"])
                     if seconds_since_epoch > 1:
@@ -158,7 +192,7 @@ def generate_scatter_plots(misp_data, directory, galaxy_type, entry_description,
                             # scan the attributes and update the scores accordingly
                             #
                             for attribute in event_attributes:
-                                bin = bin_ipv4_first_octet(event, attribute)
+                                bin = bin_function(event, attribute)
                                 if bin != -1:
                                     score[bin] += 1
 
