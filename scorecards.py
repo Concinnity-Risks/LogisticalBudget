@@ -28,6 +28,11 @@ def generate_threat_actor_scorecards(misp_data, directory, start_date, end_date)
     end_date - A datetime object with the latest date of events to be used when scoring,
         use the datetime epoch to ignore the date
     """
+
+    if not os.path.exists("scorecards-actors"):
+        os.makedirs("scorecards-actors")
+    print("Generating Threat Actor scorecards")
+
     generate_scorecards(misp_data, directory, "threat-actor", "threat actor", start_date, end_date)
 
 
@@ -42,6 +47,11 @@ def generate_ransomware_scorecards(misp_data, directory, start_date, end_date):
     end_date - A datetime object with the latest date of events to be used when scoring,
         use the datetime epoch to ignore the date
     """
+
+    if not os.path.exists("scorecards-ransomware"):
+        os.makedirs("scorecards-ransomware")
+    print("Generating Ransomware scorecards")
+
     generate_scorecards(misp_data, directory, "ransomware", "ransomware", start_date, end_date)
 
 

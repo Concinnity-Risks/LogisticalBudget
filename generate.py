@@ -5,7 +5,6 @@
 #
 import sys
 import platform
-import os
 import json
 import pprint
 import argparse
@@ -146,34 +145,18 @@ if __name__ == "__main__":
     if args.scorecards:
         # Produce a score table against various criteria for each threat actor and for each ransomware
         #
-        if not os.path.exists("scorecards-actors"):
-            os.makedirs("scorecards-actors")
-        print("Generating Threat Actor scorecards")
         scorecards.generate_threat_actor_scorecards(misp_data, "scorecards-actors", args.start_date, args.end_date)
-
-        if not os.path.exists("scorecards-ransomware"):
-            os.makedirs("scorecards-ransomware")
-        print("Generating Ransomware scorecards")
         scorecards.generate_ransomware_scorecards(misp_data, "scorecards-ransomware", args.start_date, args.end_date)
 
     if args.scatter_plots:
         # Produce plot of activity of various threat actors over time
         #
-        if not os.path.exists("scatter-plot-actors"):
-            os.makedirs("scatter-plot-actors")
-        print("Generating Threat Actor scatter plots")
         scatter.generate_threat_actor_scatter_plots(misp_data, "scatter-plot-actors", args.start_date, args.end_date)
-
-        if not os.path.exists("scatter-plot-ransomware"):
-            os.makedirs("scatter-plot-ransomware")
-        print("Generating Ransomware scatter plots")
         scatter.generate_ransomware_scatter_plots(misp_data, "scatter-plot-ransomware", args.start_date, args.end_date)
 
     if args.heatmaps:
         # Generate the desired heat maps
         #
-        if not os.path.exists("heatmaps"):
-            os.makedirs("heatmaps")
         if args.num_days != 0 and args.bin_size != 0:
             print("Generating custom heatmaps")
             heatmaps.generate_heatmaps(misp_data, num_days = args.num_days, bin_size = args.bin_size, bin_name = "custom")

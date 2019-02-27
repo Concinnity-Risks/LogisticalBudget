@@ -35,6 +35,10 @@ def generate_threat_actor_scatter_plots(misp_data, directory, start_date, end_da
         use the datetime epoch to ignore the date
     """
 
+    if not os.path.exists("scatter-plot-actors"):
+        os.makedirs("scatter-plot-actors")
+    print("Generating Threat Actor scatter plots")
+
     generate_scatter_plots(misp_data, directory, "threat-actor",
                            "threat actor", start_date, end_date)
 
@@ -50,6 +54,10 @@ def generate_ransomware_scatter_plots(misp_data, directory, start_date, end_date
     end_date - A datetime object with the latest date of events to be used when scoring,
         use the datetime epoch to ignore the date
     """
+
+    if not os.path.exists("scatter-plot-ransomware"):
+        os.makedirs("scatter-plot-ransomware")
+    print("Generating Ransomware scatter plots")
 
     generate_scatter_plots(misp_data, directory, "ransomware",
                            "ransomware", start_date, end_date)

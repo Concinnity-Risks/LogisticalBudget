@@ -3,10 +3,10 @@
 
 # Standard Python imports
 #
-import sys
+import os
+import subprocess
 import datetime
 import math
-import subprocess
 
 # For progress bars
 from tqdm import tqdm
@@ -31,6 +31,9 @@ def generate_heatmaps(misp_data, num_days, bin_size, bin_name):
     bin_size - The number of days in each graph block
     bin_name - The name for a graph block
     """
+
+    if not os.path.exists("heatmaps"):
+        os.makedirs("heatmaps")
 
     sets = []
     for html in [True, False]:
